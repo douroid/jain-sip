@@ -29,7 +29,7 @@ import io.pkts.packet.sip.header.impl.RouteHeaderImpl;
  * 
  * @author jonas@jonasborjesson.com
  */
-public interface RouteHeader extends AddressParametersHeader {
+public interface RouteHeader extends AddressParametersHeader,javax.sip.header.RouteHeader {
 
     Buffer NAME = Buffers.wrap("Route");
 

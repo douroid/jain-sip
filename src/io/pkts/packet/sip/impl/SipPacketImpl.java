@@ -349,7 +349,7 @@ public abstract class SipPacketImpl extends AbstractPacket implements SipPacket 
      */
     @Override
     public Buffer getRawContent() {
-        return this.msg.getRawContent();
+        return this.msg.getRawContentIO();
     }
 
     /*
@@ -369,7 +369,7 @@ public abstract class SipPacketImpl extends AbstractPacket implements SipPacket 
      */
     @Override
     public Buffer getMethod() throws SipParseException {
-        return this.msg.getMethod();
+        return this.msg.getMethodIO();
     }
 
     /*
@@ -703,7 +703,7 @@ public abstract class SipPacketImpl extends AbstractPacket implements SipPacket 
 
     @Override
     public Buffer getPayload() {
-        return this.msg.getRawContent();
+        return this.msg.getRawContentIO();
     }
 
     /*

@@ -73,7 +73,7 @@ import java.util.function.Supplier;
  * @author jonas@jonasborjesson.com
  * 
  */
-public interface ViaHeader extends Parameters, SipHeader {
+public interface ViaHeader extends Parameters, SipHeader, javax.sip.header.ViaHeader {
 
     Buffer NAME = Buffers.wrap("Via");
 
@@ -83,13 +83,13 @@ public interface ViaHeader extends Parameters, SipHeader {
      * 
      * @return
      */
-    Buffer getTransport();
+    Buffer getTransportIO();
 
-    Buffer getHost();
+    Buffer getHostIO();
 
     int getPort();
 
-    Buffer getReceived();
+    Buffer getReceivedIO();
 
     void setReceived(Buffer received);
 
@@ -130,7 +130,7 @@ public interface ViaHeader extends Parameters, SipHeader {
      * 
      * @return
      */
-    Buffer getBranch();
+    Buffer getBranchIO();
 
     void setBranch(Buffer branch);
 

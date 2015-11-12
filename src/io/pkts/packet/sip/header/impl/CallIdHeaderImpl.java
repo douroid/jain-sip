@@ -7,6 +7,7 @@ import io.pkts.buffer.Buffer;
 import io.pkts.buffer.Buffers;
 import io.pkts.packet.sip.SipParseException;
 import io.pkts.packet.sip.header.CallIdHeader;
+import java.text.ParseException;
 
 import java.util.UUID;
 
@@ -14,7 +15,7 @@ import java.util.UUID;
  * @author jonas@jonasborjesson.com
  * 
  */
-public final class CallIdHeaderImpl extends SipHeaderImpl implements CallIdHeader {
+public final class CallIdHeaderImpl extends SipHeaderImpl implements CallIdHeader{
 
     public CallIdHeaderImpl() {
         super(CallIdHeader.NAME, generateCallId());
@@ -32,7 +33,7 @@ public final class CallIdHeaderImpl extends SipHeaderImpl implements CallIdHeade
      * {@inheritDoc}
      */
     @Override
-    public Buffer getCallId() {
+    public Buffer getCallIdIO() {
         return getValue();
     }
 
@@ -92,6 +93,16 @@ public final class CallIdHeaderImpl extends SipHeaderImpl implements CallIdHeade
     @Override
     public CallIdHeader ensure() {
         return this;
+    }
+
+    @Override
+    public void setCallId(String callId) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getCallId() {
+        return getCallIdIO().toString();
     }
 
 }

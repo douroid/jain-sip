@@ -8,7 +8,7 @@ import io.pkts.packet.sip.header.impl.ExpiresHeaderImpl;
 
 import java.io.IOException;
 
-public interface ExpiresHeader extends SipHeader {
+public interface ExpiresHeader extends SipHeader,javax.sip.header.ExpiresHeader {
 
     Buffer NAME = Buffers.wrap("Expires");
 

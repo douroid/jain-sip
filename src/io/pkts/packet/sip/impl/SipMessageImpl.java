@@ -26,13 +26,21 @@ import io.pkts.sdp.SdpException;
 import io.pkts.sdp.SdpParseException;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
+import javax.sip.SipException;
+import javax.sip.header.ContentDispositionHeader;
+import javax.sip.header.ContentEncodingHeader;
+import javax.sip.header.ContentLanguageHeader;
+import javax.sip.header.ContentLengthHeader;
+import javax.sip.header.Header;
 
 /**
  * @author jonas@jonasborjesson.com
@@ -172,7 +180,7 @@ public abstract class SipMessageImpl implements SipMessage {
      * @throws SipParseException
      * @throws ClassCastException
      */
-    protected SipResponseLine getResponseLine() throws SipParseException, ClassCastException {
+    public SipResponseLine getResponseLine() throws SipParseException, ClassCastException {
         return (SipResponseLine) getInitialLineInternal();
     }
 
@@ -210,7 +218,7 @@ public abstract class SipMessageImpl implements SipMessage {
                 return null;
             }
 
-            final Buffer currentHeaderName = nextHeaders.get(0).getName();
+            final Buffer currentHeaderName = nextHeaders.get(0).getNameIO();
             headers = this.parsedHeaders.get(currentHeaderName);
             if (headers == null) {
                 this.parsedHeaders.put(currentHeaderName, nextHeaders);
@@ -237,7 +245,7 @@ public abstract class SipMessageImpl implements SipMessage {
     }
 
     private SipHeader ensureHeaderIsFramed(final SipHeader header) {
-        final Function<SipHeader, ? extends SipHeader> function = SipParser.framers.get(header.getName());
+        final Function<SipHeader, ? extends SipHeader> function = SipParser.framers.get(header.getNameIO());
         if (function != null) {
             return function.apply(header);
         }
@@ -288,7 +296,7 @@ public abstract class SipMessageImpl implements SipMessage {
                 return;
             }
 
-            final Buffer currentHeaderName = nextHeaders.get(0).getName();
+            final Buffer currentHeaderName = nextHeaders.get(0).getNameIO();
             final List<SipHeader> headers = this.parsedHeaders.get(currentHeaderName);
 
             if (headers == null) {
@@ -300,10 +308,10 @@ public abstract class SipMessageImpl implements SipMessage {
     }
 
     private void internalAddHeader(final SipHeader header, final boolean addFirst) {
-        List<SipHeader> headers = this.parsedHeaders.get(header.getName());
+        List<SipHeader> headers = this.parsedHeaders.get(header.getNameIO());
         if (headers == null) {
             headers = new ArrayList<SipHeader>();
-            this.parsedHeaders.put(header.getName(), headers);
+            this.parsedHeaders.put(header.getNameIO(), headers);
         }
 
         if (addFirst) {
@@ -323,7 +331,7 @@ public abstract class SipMessageImpl implements SipMessage {
         frameAllHeaders();
         final List<SipHeader> headers = new ArrayList<SipHeader>();
         headers.add(header);
-        this.parsedHeaders.put(header.getName(), headers);
+        this.parsedHeaders.put(header.getNameIO(), headers);
     }
 
     /**
@@ -500,7 +508,7 @@ public abstract class SipMessageImpl implements SipMessage {
      * {@inheritDoc}
      */
     @Override
-    public abstract Buffer getMethod() throws SipParseException;
+    public abstract Buffer getMethodIO() throws SipParseException;
 
     /**
      * {@inheritDoc}
@@ -526,7 +534,7 @@ public abstract class SipMessageImpl implements SipMessage {
      */
     @Override
     public boolean isInvite() throws SipParseException {
-        final Buffer m = getMethod();
+        final Buffer m = getMethodIO();
         try {
             return m.getByte(0) == 'I' && m.getByte(1) == 'N' && m.getByte(2) == 'V' && m.getByte(3) == 'I'
                     && m.getByte(4) == 'T' && m.getByte(5) == 'E';
@@ -540,7 +548,7 @@ public abstract class SipMessageImpl implements SipMessage {
      */
     @Override
     public boolean isRegister() throws SipParseException {
-        final Buffer m = getMethod();
+        final Buffer m = getMethodIO();
         try {
             return m.getByte(0) == 'R' && m.getByte(1) == 'E' && m.getByte(2) == 'G' && m.getByte(3) == 'I'
                     && m.getByte(4) == 'S' && m.getByte(5) == 'T' && m.getByte(6) == 'E' && m.getByte(7) == 'R';
@@ -554,7 +562,7 @@ public abstract class SipMessageImpl implements SipMessage {
      */
     @Override
     public boolean isBye() throws SipParseException {
-        final Buffer m = getMethod();
+        final Buffer m = getMethodIO();
         try {
             return m.getByte(0) == 'B' && m.getByte(1) == 'Y' && m.getByte(2) == 'E';
         } catch (final IOException e) {
@@ -567,7 +575,7 @@ public abstract class SipMessageImpl implements SipMessage {
      */
     @Override
     public boolean isAck() throws SipParseException {
-        final Buffer m = getMethod();
+        final Buffer m = getMethodIO();
         try {
             return m.getByte(0) == 'A' && m.getByte(1) == 'C' && m.getByte(2) == 'K';
         } catch (final IOException e) {
@@ -580,7 +588,7 @@ public abstract class SipMessageImpl implements SipMessage {
      */
     @Override
     public boolean isCancel() throws SipParseException {
-        final Buffer m = getMethod();
+        final Buffer m = getMethodIO();
         try {
             return m.getByte(0) == 'C' && m.getByte(1) == 'A' && m.getByte(2) == 'N' && m.getByte(3) == 'C'
                     && m.getByte(4) == 'E' && m.getByte(5) == 'L';
@@ -591,7 +599,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     @Override
     public boolean isOptions() throws SipParseException {
-        final Buffer m = getMethod();
+        final Buffer m = getMethodIO();
         try {
             return m.getByte(0) == 'O' && m.getByte(1) == 'P' && m.getByte(2) == 'T' && m.getByte(3) == 'I'
                     && m.getByte(4) == 'O' && m.getByte(5) == 'N' && m.getByte(6) == 'S';
@@ -602,7 +610,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     @Override
     public boolean isMessage() throws SipParseException {
-        final Buffer m = getMethod();
+        final Buffer m = getMethodIO();
         try {
             return m.getByte(0) == 'M' && m.getByte(1) == 'E' && m.getByte(2) == 'S' && m.getByte(3) == 'S'
                     && m.getByte(4) == 'A' && m.getByte(5) == 'G' && m.getByte(6) == 'E';
@@ -613,7 +621,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     @Override
     public boolean isInfo() throws SipParseException {
-        final Buffer m = getMethod();
+        final Buffer m = getMethodIO();
         try {
             return m.getByte(0) == 'I' && m.getByte(1) == 'N' && m.getByte(2) == 'F' && m.getByte(3) == 'O';
         } catch (final IOException e) {
@@ -654,7 +662,7 @@ public abstract class SipMessageImpl implements SipMessage {
     }
 
     @Override
-    public final Buffer getRawContent() {
+    public final Buffer getRawContentIO() {
         if (!hasContent()) {
             return null;
         }
@@ -745,8 +753,134 @@ public abstract class SipMessageImpl implements SipMessage {
     @Override
     public abstract SipMessage clone();
 
-    @Override
+   /* @Override
     public Map<Buffer, List<SipHeader>> getHeaderMap(){
         return this.parsedHeaders;
+    }*/
+    
+    @Override
+    public void addHeader(Header header) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void addLast(Header header) throws SipException, NullPointerException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void addFirst(Header header) throws SipException, NullPointerException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeFirst(String headerName) throws NullPointerException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeLast(String headerName) throws NullPointerException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeHeader(String headerName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ListIterator getHeaderNames() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ListIterator getHeaders(String headerName) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ListIterator getUnrecognizedHeaders() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setHeader(Header header) {
+        this.setHeader((SipHeader)header);
+    }
+
+    @Override
+    public void setContentLength(ContentLengthHeader contentLength) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ContentLengthHeader getContentLength() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setContentLanguage(ContentLanguageHeader contentLanguage) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ContentLanguageHeader getContentLanguage() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setContentEncoding(ContentEncodingHeader contentEncoding) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ContentEncodingHeader getContentEncoding() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setContentDisposition(ContentDispositionHeader contentDisposition) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public ContentDispositionHeader getContentDisposition() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setContent(Object content, javax.sip.header.ContentTypeHeader contentTypeHeader) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public byte[] getRawContent() {
+        return getRawContentIO().getArray();
+    }
+
+    @Override
+    public void removeContent() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setExpires(javax.sip.header.ExpiresHeader expires) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public javax.sip.header.ExpiresHeader getExpires() {
+        return getExpiresHeader();
+    }
+
+    @Override
+    public void setSIPVersion(String version) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getSIPVersion() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
 }

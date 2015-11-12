@@ -19,13 +19,13 @@ public interface MediaTypeHeader extends SipHeader {
      * 
      * @return
      */
-    Buffer getContentType();
+    Buffer getContentTypeIO();
 
     /**
      * 
      * @return
      */
-    Buffer getContentSubType();
+    Buffer getContentSubTypeIO();
 
     /**
      * Convenience method for checking whether the media type is

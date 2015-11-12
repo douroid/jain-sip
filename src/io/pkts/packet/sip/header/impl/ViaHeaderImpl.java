@@ -14,9 +14,12 @@ import io.pkts.packet.sip.header.ViaHeader;
 import io.pkts.packet.sip.impl.SipParser;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
+import javax.sip.InvalidArgumentException;
 
 /**
  * Not extending the {@link ParametersImpl} because the way we parse the
@@ -104,7 +107,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getParameter(final Buffer name) throws SipParseException, IllegalArgumentException {
+    public Buffer getParameterIO(final Buffer name) throws SipParseException, IllegalArgumentException {
         final int index = findParameter(name);
         if (index == -1) {
             return null;
@@ -117,8 +120,8 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getParameter(final String name) throws SipParseException, IllegalArgumentException {
-        return getParameter(Buffers.wrap(name));
+    public Buffer getParameterIO(final String name) throws SipParseException, IllegalArgumentException {
+        return getParameterIO(Buffers.wrap(name));
     }
 
     @Override
@@ -143,12 +146,12 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getName() {
+    public Buffer getNameIO() {
         return ViaHeader.NAME;
     }
 
     @Override
-    public Buffer getTransport() {
+    public Buffer getTransportIO() {
         return this.transport;
     }
 
@@ -168,7 +171,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
     }
 
     @Override
-    public Buffer getHost() {
+    public Buffer getHostIO() {
         return this.host;
     }
 
@@ -184,7 +187,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
     }
 
     @Override
-    public Buffer getReceived() {
+    public Buffer getReceivedIO() {
         if (this.indexOfReceived == -1) {
             this.indexOfReceived = findParameter(RECEIVED);
         }
@@ -255,7 +258,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
     }
 
     @Override
-    public Buffer getBranch() {
+    public Buffer getBranchIO() {
         if (this.indexOfBranch == -1) {
             this.indexOfBranch = findParameter(BRANCH);
         }
@@ -331,7 +334,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
 
     @Override
     public void getBytes(final Buffer dst) {
-        NAME.getBytes(0, dst);
+        io.pkts.packet.sip.header.ViaHeader.NAME.getBytes(0, dst);
         dst.write(SipParser.COLON);
         dst.write(SipParser.SP);
         transferValue(dst);
@@ -376,6 +379,106 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
     @Override
     public ViaHeader ensure() {
         return this;
+    }
+
+    @Override
+    public void setHost(String host) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getHost() {
+        return getHostIO().toString();
+    }
+
+    @Override
+    public void setPort(int port) throws InvalidArgumentException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getTransport() {
+        return getTransportIO().toString();
+    }
+
+    @Override
+    public void setTransport(String transport) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getProtocol() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setProtocol(String protocol) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setTTL(int ttl) throws InvalidArgumentException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getMAddr() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setMAddr(String mAddr) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getReceived() {
+        return getReceivedIO().toString();
+    }
+
+    @Override
+    public void setReceived(String received) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getBranch() {
+        return getBranchIO().toString();
+    }
+
+    @Override
+    public void setBranch(String branch) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setRPort() throws InvalidArgumentException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getParameter(String name) {
+        return getParameterIO(name).toString();
+    }
+
+    @Override
+    public void setParameter(String name, String value) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Iterator getParameterNames() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeParameter(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getName() {
+        return getNameIO().toString();
     }
 
 }

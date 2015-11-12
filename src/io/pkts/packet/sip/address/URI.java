@@ -12,7 +12,7 @@ import java.io.IOException;
  * @author jonas@jonasborjesson.com
  * 
  */
-public interface URI {
+public interface URI extends javax.sip.address.URI {
 
     /**
      * Returns the scheme of this URI, which really can be anything (see RFC3261
@@ -21,13 +21,14 @@ public interface URI {
      * 
      * @return
      */
-    Buffer getScheme();
+    Buffer getSchemeIO();
 
     /**
      * Check whether this {@link URI} is a "sip" or "sips" URI.
      * 
      * @return true if this {@link URI} is a SIP URI, false otherwise.
      */
+    @Override
     boolean isSipURI();
 
     /**
@@ -58,6 +59,7 @@ public interface URI {
         throw new RuntimeException("Have only implemented SIP uri parsing right now. Sorry");
     }
 
+    @Override
     URI clone();
 
 

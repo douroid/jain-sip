@@ -26,7 +26,7 @@ public abstract class URIImpl implements URI {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getScheme() {
+    public Buffer getSchemeIO() {
         return this.scheme;
     }
 
@@ -40,6 +40,16 @@ public abstract class URIImpl implements URI {
 
     @Override
     public abstract URI clone();
+
+    @Override
+    public void getBytes(Buffer dst) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getScheme() {
+        return getSchemeIO().toString();
+    }
 
 
 }

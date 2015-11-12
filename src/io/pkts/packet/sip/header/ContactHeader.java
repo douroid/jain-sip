@@ -10,7 +10,7 @@ import io.pkts.packet.sip.header.impl.ContactHeaderImpl;
 /**
  * @author jonas@jonasborjesson.com
  */
-public interface ContactHeader extends AddressParametersHeader {
+public interface ContactHeader extends AddressParametersHeader,javax.sip.header.ContactHeader {
 
     Buffer NAME = Buffers.wrap("Contact");
 

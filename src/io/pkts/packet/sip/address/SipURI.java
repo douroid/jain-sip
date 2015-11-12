@@ -20,7 +20,7 @@ import java.io.IOException;
  * @author jonas@jonasborjesson.com
  * 
  */
-public interface SipURI extends URI {
+public interface SipURI extends URI, javax.sip.address.SipURI {
 
     /**
      * Get the user portion of this URI.
@@ -28,14 +28,14 @@ public interface SipURI extends URI {
      * @return the user portion of this URI or an empty buffer if there is no
      *         user portion
      */
-    Buffer getUser();
+    Buffer getUserIO();
 
     /**
      * Get the host portion of this URI.
      * 
      * @return
      */
-    Buffer getHost();
+    Buffer getHostIO();
 
     /**
      * Get the port. If the port isn't set then -1 (negative one) will be
@@ -70,7 +70,7 @@ public interface SipURI extends URI {
      * @return
      * @throws SipParseException
      */
-    Buffer getTransportParam() throws SipParseException;
+    Buffer getTransportParamIO() throws SipParseException;
 
     /**
      * Get the user parameter. This is the same as {@link #getParameter("user")}
@@ -78,7 +78,7 @@ public interface SipURI extends URI {
      * @return
      * @throws SipParseException
      */
-    Buffer getUserParam() throws SipParseException;
+    Buffer getUserParamIO() throws SipParseException;
 
     /**
      * Get the ttl parameter. This is the same as {@link #getParameter("ttl")}
@@ -94,7 +94,7 @@ public interface SipURI extends URI {
      * @return
      * @throws SipParseException
      */
-    Buffer getMAddrParam() throws SipParseException;
+    Buffer getMAddrParamIO() throws SipParseException;
 
     /**
      * Get the method parameter. This is the same as {@link #getParameter("method")}
@@ -102,7 +102,7 @@ public interface SipURI extends URI {
      * @return
      * @throws SipParseException
      */
-    Buffer getMethodParam() throws SipParseException;
+    Buffer getMethodParamIO() throws SipParseException;
 
     /**
      * Get the value of the named parameter. If the named parameter is a so-called flag parameter,
@@ -127,7 +127,7 @@ public interface SipURI extends URI {
      * @throws SipParseException in case anything goes wrong while extracting the parameter.
      * @throws IllegalArgumentException in case the name is null.
      */
-    Buffer getParameter(String name) throws SipParseException, IllegalArgumentException;
+    Buffer getParameterIO(String name) throws SipParseException, IllegalArgumentException;
 
     /**
      * Sets the value of the specified parameter. If there already is a parameter with the same name
@@ -267,11 +267,11 @@ public interface SipURI extends URI {
      */
     public static Builder with(final SipURI uri) {
         final Builder b = new Builder();
-        b.user(uri.getUser());
-        b.host(uri.getHost());
+        b.user(uri.getUserIO());
+        b.host(uri.getHostIO());
         b.port(uri.getPort());
         b.secure(uri.isSecure());
-        final Buffer transport = uri.getTransportParam();
+        final Buffer transport = uri.getTransportParamIO();
         if (transport != null && !transport.isEmpty()) {
             b.parameter(SipParser.TRANSPORT, transport);
         }

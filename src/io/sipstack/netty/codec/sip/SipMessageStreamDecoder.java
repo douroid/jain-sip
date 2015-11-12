@@ -1,9 +1,10 @@
 /**
- * 
+ *
  */
 package io.sipstack.netty.codec.sip;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufProcessor;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -21,7 +22,7 @@ import java.util.List;
 
 /**
  * @author jonas
- * 
+ *
  */
 public class SipMessageStreamDecoder extends ByteToMessageDecoder {
 
@@ -47,7 +48,7 @@ public class SipMessageStreamDecoder extends ByteToMessageDecoder {
     private RawMessage message;
 
     /**
-     * 
+     *
      */
     public SipMessageStreamDecoder(final Clock clock) {
         this.clock = clock;
@@ -71,6 +72,17 @@ public class SipMessageStreamDecoder extends ByteToMessageDecoder {
                 final byte b = buffer.readByte();
                 this.message.write(b);
             }
+            /*int index = buffer.forEachByte(new ByteBufProcessor() {
+                @Override
+                public boolean process(byte value) {
+                    try {
+                    message.write(value);
+                    return !message.isComplete();
+                    } catch (Exception e) {
+                        return false;
+                    }
+                }
+            });*/
         } catch (final MaxMessageSizeExceededException e) {
             dropConnection(ctx, e.getMessage());
             // TODO: mark this connection as dead since the future

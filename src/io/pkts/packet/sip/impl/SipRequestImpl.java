@@ -17,6 +17,16 @@ import io.pkts.packet.sip.header.RouteHeader;
 import io.pkts.packet.sip.header.SipHeader;
 import io.pkts.packet.sip.header.ToHeader;
 import io.pkts.packet.sip.header.ViaHeader;
+import java.text.ParseException;
+import java.util.ListIterator;
+import javax.sip.SipException;
+import javax.sip.header.ContentDispositionHeader;
+import javax.sip.header.ContentEncodingHeader;
+import javax.sip.header.ContentLanguageHeader;
+import javax.sip.header.ContentLengthHeader;
+import javax.sip.header.ContentTypeHeader;
+import javax.sip.header.ExpiresHeader;
+import javax.sip.header.Header;
 
 /**
  * @author jonas@jonasborjesson.com
@@ -140,7 +150,7 @@ public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getMethod() {
+    public Buffer getMethodIO() {
         return getRequestLine().getMethod();
     }
 
@@ -219,6 +229,26 @@ public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
             return reason.slice(); // really need to create immutable buffers
         }
         return UNKOWN_REASON.slice();
+    }
+
+    @Override
+    public String getMethod() {
+        return getMethodIO().toString();
+    }
+
+    @Override
+    public void setMethod(String method) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public javax.sip.address.URI getRequestURI() {
+        return getRequestUri();
+    }
+
+    @Override
+    public void setRequestURI(javax.sip.address.URI requestURI) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.        
     }
 
 }

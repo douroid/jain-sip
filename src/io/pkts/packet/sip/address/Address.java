@@ -15,7 +15,7 @@ import io.pkts.packet.sip.address.impl.AddressImpl;
 /**
  * @author jonas@jonasborjesson.com
  */
-public interface Address {
+public interface Address extends javax.sip.address.Address{
 
     /**
      * Get the display name of this {@link Address} or an empty buffer if it is
@@ -23,7 +23,7 @@ public interface Address {
      * 
      * @return
      */
-    Buffer getDisplayName();
+    Buffer getDisplayNameIO();
 
     /**
      * Get the {@link URI} of this {@link Address}.

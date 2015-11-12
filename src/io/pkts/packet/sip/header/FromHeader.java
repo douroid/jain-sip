@@ -64,7 +64,7 @@ import java.util.Random;
  * 
  * @author jonas@jonasborjesson.com
  */
-public interface FromHeader extends AddressParametersHeader {
+public interface FromHeader extends AddressParametersHeader,javax.sip.header.FromHeader {
 
     Buffer NAME = Buffers.wrap("From");
 
@@ -75,7 +75,7 @@ public interface FromHeader extends AddressParametersHeader {
      * @throws SipParseException
      *             in case anything goes wrong while extracting tag.
      */
-    Buffer getTag() throws SipParseException;
+    Buffer getTagIO() throws SipParseException;
 
     @Override
     FromHeader clone();

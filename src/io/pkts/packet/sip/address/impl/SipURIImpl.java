@@ -11,14 +11,16 @@ import io.pkts.packet.sip.header.impl.ParametersSupport;
 import io.pkts.packet.sip.impl.SipParser;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import javax.sip.InvalidArgumentException;
 
 /**
  * @author jonas@jonasborjesson.com
  */
-public class SipURIImpl extends URIImpl implements SipURI {
+public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipURI {
 
     /**
      * The full raw sip(s) URI
@@ -168,7 +170,7 @@ public class SipURIImpl extends URIImpl implements SipURI {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getUser() {
+    public Buffer getUserIO() {
         // TODO: this is not 100% correct since it may
         // actually contain a password as well.
         if (this.userInfo != null) {
@@ -182,7 +184,7 @@ public class SipURIImpl extends URIImpl implements SipURI {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getHost() {
+    public Buffer getHostIO() {
         return this.host.slice();
     }
 
@@ -219,12 +221,12 @@ public class SipURIImpl extends URIImpl implements SipURI {
     }
 
     @Override
-    public Buffer getTransportParam() throws SipParseException {
+    public Buffer getTransportParamIO() throws SipParseException {
         return getParameter(SipParser.TRANSPORT);
     }
 
     @Override
-    public Buffer getUserParam() throws SipParseException {
+    public Buffer getUserParamIO() throws SipParseException {
         return getParameter(SipParser.USER);
     }
 
@@ -242,12 +244,12 @@ public class SipURIImpl extends URIImpl implements SipURI {
     }
 
     @Override
-    public Buffer getMAddrParam() throws SipParseException {
+    public Buffer getMAddrParamIO() throws SipParseException {
         return getParameter(SipParser.MADDR);
     }
 
     @Override
-    public Buffer getMethodParam() throws SipParseException {
+    public Buffer getMethodParamIO() throws SipParseException {
         return getParameter(SipParser.METHOD);
     }
 
@@ -277,11 +279,11 @@ public class SipURIImpl extends URIImpl implements SipURI {
             // actually case sensitive. The rest isn't though.
             //
             // TODO: must handle escaped characters
-            if (!this.getUser().equals(o.getUser())) {
+            if (!this.getUserIO().equals(o.getUserIO())) {
                 return false;
             }
 
-            if (!this.getHost().equalsIgnoreCase(o.getHost())) {
+            if (!this.getHostIO().equalsIgnoreCase(o.getHostIO())) {
                 return false;
             }
 
@@ -290,20 +292,20 @@ public class SipURIImpl extends URIImpl implements SipURI {
             }
 
             // the specification doesn't call out transport but their examples do
-            if (getTransportParam() == null ^ o.getTransportParam() == null) {
+            if (getTransportParamIO() == null ^ o.getTransportParamIO() == null) {
                 return false;
             }
 
-            if (getUserParam() == null ^ o.getUserParam() == null) {
+            if (getUserParamIO() == null ^ o.getUserParamIO() == null) {
                 return false;
             }
             if (getTTLParam() != o.getTTLParam()) {
                 return false;
             }
-            if (getMethodParam() == null ^ o.getMethodParam() == null) {
+            if (getMethodParamIO() == null ^ o.getMethodParamIO() == null) {
                 return false;
             }
-            if (getMAddrParam() == null ^ o.getMAddrParam() == null) {
+            if (getMAddrParamIO() == null ^ o.getMAddrParamIO() == null) {
                 return false;
             }
 
@@ -350,9 +352,9 @@ public class SipURIImpl extends URIImpl implements SipURI {
     public int hashCode() {
         final int prime = 31;
         int result = 1 + getPort();
-        result = prime * result + getUser().hashCode();
+        result = prime * result + getUserIO().hashCode();
         // note that the host portion is case IN-sensitive
-        result = prime * result + getHost().toString().toLowerCase().hashCode();
+        result = prime * result + getHostIO().toString().toLowerCase().hashCode();
         return result;
     }
 
@@ -371,7 +373,7 @@ public class SipURIImpl extends URIImpl implements SipURI {
     }
 
     @Override
-    public Buffer getParameter(final String name) throws SipParseException, IllegalArgumentException {
+    public Buffer getParameterIO(final String name) throws SipParseException, IllegalArgumentException {
         return this.paramsSupport.getParameter(name);
     }
 
@@ -398,5 +400,131 @@ public class SipURIImpl extends URIImpl implements SipURI {
     @Override
     public void setParameter(final String name, final int value) throws SipParseException, IllegalArgumentException {
         this.setParameter(Buffers.wrap(name), Buffers.wrap(value));
+    }
+
+
+    @Override
+    public void setUser(String user) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getUser() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setUserPassword(String userPassword) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getUserPassword() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setSecure(boolean secure) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setHost(String host) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getHost() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removePort() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getHeader(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setHeader(String name, String value) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Iterator getHeaderNames() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getTransportParam() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setTransportParam(String transport) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setTTLParam(int ttl) throws InvalidArgumentException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getMethodParam() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setMethodParam(String method) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setUserParam(String userParam) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getUserParam() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getMAddrParam() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setMAddrParam(String mAddr) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean hasLrParam() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setLrParam() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getParameter(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Iterator getParameterNames() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void removeParameter(String name) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

@@ -6,6 +6,7 @@ package io.pkts.packet.sip.header.impl;
 import io.pkts.buffer.Buffer;
 import io.pkts.buffer.Buffers;
 import io.pkts.packet.sip.header.MaxForwardsHeader;
+import javax.sip.header.TooManyHopsException;
 
 /**
  * @author jonas@jonasborjesson.com
@@ -51,6 +52,16 @@ public class MaxForwardsHeaderImpl extends SipHeaderImpl implements MaxForwardsH
     @Override
     public MaxForwardsHeader ensure() {
         return this;
+    }
+
+    @Override
+    public void decrementMaxForwards() throws TooManyHopsException {
+        decrement();
+    }
+
+    @Override
+    public String getName() {
+        return getNameIO().toString();
     }
 
 }

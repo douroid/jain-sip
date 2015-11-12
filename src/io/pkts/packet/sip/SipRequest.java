@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * @author jonas@jonasborjesson.com
  */
-public interface SipRequest extends SipMessage {
+public interface SipRequest extends SipMessage, javax.sip.message.Request {
 
     /**
      * Get the request uri of the sip request
@@ -230,8 +230,8 @@ public interface SipRequest extends SipMessage {
          */
         private ToHeader getToHeader() {
             if (this.to == null) {
-                final Buffer user = this.requestURI.getUser();
-                final Buffer host = this.requestURI.getHost();
+                final Buffer user = this.requestURI.getUserIO();
+                final Buffer host = this.requestURI.getHostIO();
                 this.to = ToHeader.with().user(user).host(host).build();
             }
             return this.to;

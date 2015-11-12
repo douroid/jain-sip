@@ -15,7 +15,7 @@ import java.util.Random;
 /**
  * @author jonas@jonasborjesson.com
  */
-public interface ToHeader extends AddressParametersHeader {
+public interface ToHeader extends AddressParametersHeader,javax.sip.header.ToHeader {
 
     Buffer NAME = Buffers.wrap("To");
 
@@ -26,7 +26,7 @@ public interface ToHeader extends AddressParametersHeader {
      * @throws SipParseException
      *             in case anything goes wrong while extracting tag.
      */
-    Buffer getTag() throws SipParseException;
+    Buffer getTagIO() throws SipParseException;
 
     @Override
     ToHeader clone();

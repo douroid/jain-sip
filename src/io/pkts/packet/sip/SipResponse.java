@@ -5,11 +5,12 @@ package io.pkts.packet.sip;
 
 import io.pkts.buffer.Buffer;
 import io.pkts.packet.sip.header.ViaHeader;
+import io.pkts.packet.sip.impl.SipResponseLine;
 
 /**
  * @author jonas@jonasborjesson.com
  */
-public interface SipResponse extends SipMessage {
+public interface SipResponse extends SipMessage, javax.sip.message.Response {
 
     /**
      * Get the status code of this SIP response
@@ -23,7 +24,7 @@ public interface SipResponse extends SipMessage {
      * 
      * @return
      */
-    Buffer getReasonPhrase();
+    Buffer getReasonPhraseIO();
 
     /**
      * Convenience method for checking whether this is a 1xx response or not.
@@ -111,5 +112,7 @@ public interface SipResponse extends SipMessage {
 
     @Override
     SipResponse clone();
+    
+    SipResponseLine getResponseLine() throws SipParseException, ClassCastException;
 
 }

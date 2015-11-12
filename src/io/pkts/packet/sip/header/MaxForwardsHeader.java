@@ -15,7 +15,7 @@ import java.io.IOException;
  * @author jonas@jonasborjesson.com
  * 
  */
-public interface MaxForwardsHeader extends SipHeader {
+public interface MaxForwardsHeader extends SipHeader,javax.sip.header.MaxForwardsHeader {
 
     Buffer NAME = Buffers.wrap("Max-Forwards");
 

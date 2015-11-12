@@ -9,29 +9,55 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>javax.sip</groupId>
+    <groupId>javax.sip</groupId>
 	<artifactId>jain-sip-ri</artifactId>
-	<version>1.2.X-SNAPSHOT</version>
+	<version>7.0.3-TelScale-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>jain-sip-ri</name>
+	<name>jain-sip-ri-STACKIO</name>
 	<url>http://code.google.com/p/jain-sip/</url>
 	<build>
 		<sourceDirectory>../../src</sourceDirectory>
+                <testSourceDirectory>../../test</testSourceDirectory>
 		<plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.6</version>
+                <configuration>
+                    <createDependencyReducedPom>true</createDependencyReducedPom>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                        </filter>
+                    </filters>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>                     
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>2.3.2</version>
 				<configuration>
-					<source>1.7</source>
-					<target>1.7</target>
+					<source>1.8</source>
+					<target>1.8</target>
 					<includes>
-                                               <include>gov/nist/javax/sip/**</include>
-                                               <include>gov/nist/javax/sdp/**</include>
-                                               <include>gov/nist/core/**</include>
-                                               <include>javax/sdp/**</include>
-                                       </includes>
+						<include>gov/nist/javax/sip/**</include>
+						<include>gov/nist/javax/sdp/**</include>
+						<include>gov/nist/core/**</include>
+						<include>javax/sdp/**</include>
+                                                <include>performance/**</include>
+					</includes>
+					<excludes>
+						<exclude>gov/nist/javax/sip/stack/sctp/**</exclude>
+					</excludes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -67,37 +93,37 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.8.1</version>
+				<configuration><excludePackageNames>test.*:examples.*:performance.*:android.*</excludePackageNames></configuration>
 				<executions>
-				        <execution>
+				        <!--<execution>
 				            <id>attach-javadocs</id>
 				            <phase>verify</phase>
 				            <goals>
 				                <goal>jar</goal>
 				            </goals>
-				        </execution>
+				        </execution>-->
 				    </executions>
 			</plugin>
-			<plugin>
-			      <groupId>org.sonatype.plugins</groupId>
-			      <artifactId>nexus-staging-maven-plugin</artifactId>
-			      <version>1.6.2</version>
-			      <extensions>true</extensions>
-			      <configuration>
-				<serverId>mobicents-releases-repository</serverId>
-				<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-			      </configuration>
-			      <executions>
-				<execution>
-				    <id>deploy-to-sonatype</id>
-				    <phase>deploy</phase>
-				    <goals>
-					<goal>deploy</goal>
-					<!--goal>close</goal-->
-					<goal>release</goal>
-				    </goals>
-				</execution>
-			    </executions>
-			</plugin>
+			<!--plugin>
+                              <groupId>org.sonatype.plugins</groupId>
+                              <artifactId>nexus-staging-maven-plugin</artifactId>
+                              <version>1.6.2</version>
+                              <extensions>true</extensions>
+                              <configuration>
+                                <serverId>telscale-releases-repository</serverId>
+                                <nexusUrl>http://telestax.artifactoryonline.com</nexusUrl>
+                              </configuration>
+                              <executions>
+                                <execution>
+                                    <id>deploy-to-sonatype</id>
+                                    <phase>deploy</phase>
+                                    <goals>
+                                        <goal>deploy</goal>
+                                        <goal>release</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin-->
 		</plugins>
 		<resources>
 			<resource>
@@ -110,6 +136,7 @@
 				</includes>
 				<excludes>
 					<exclude>**/*.java</exclude>
+					<exclude>gov/nist/javax/sip/stack/sctp/**</exclude>
 				</excludes>
 			</resource>
 		</resources>		
@@ -155,6 +182,30 @@
 			<version>1.2.0</version>
 			<scope>provided</scope>
 		</dependency>
+                <!--
+        <dependency>
+            <groupId>io.sipstack</groupId>
+            <artifactId>sipstack-netty-codec-sip</artifactId>
+            <version>0.1.2-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.sip</groupId>
+                    <artifactId>jain-ri</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>                -->
+     <dependency>
+       <groupId>io.netty</groupId>
+       <artifactId>netty-all</artifactId>
+       <version>4.1.0.Beta3</version>
+       <scope>compile</scope>
+     </dependency>        
+	 <dependency>
+	  <groupId>junit</groupId>
+	  <artifactId>junit</artifactId>
+	  <version>4.10</version>
+	  <scope>test</scope>
+	 </dependency>
 	</dependencies>
 
 	<!-- repositories -->
@@ -182,8 +233,8 @@
 	</repositories>	
 
 	<scm>
-		<connection>scm:git:https://code.google.com/p/jain-sip/</connection>
-		<developerConnection>scm:git:https://code.google.com/p/jain-sip/</developerConnection>
-		<url>https://code.google.com/p/jain-sip/</url>
-	</scm>
+                <connection>scm:git:git@bitbucket.org:telestax/telscale-jsip.git</connection>
+                <developerConnection>scm:git:git@bitbucket.org:telestax/telscale-jsip.git</developerConnection>
+                <url>https://bitbucket.org/telestax/telscale-jsip</url>
+        </scm>
 </project>

@@ -10,6 +10,7 @@ import io.pkts.packet.sip.header.AddressParametersHeader;
 import io.pkts.packet.sip.header.FromHeader;
 import io.pkts.packet.sip.header.Parameters;
 import io.pkts.packet.sip.header.ToHeader;
+import javax.sip.header.HeaderAddress;
 
 
 /**
@@ -21,7 +22,7 @@ import io.pkts.packet.sip.header.ToHeader;
  * 
  * @author jonas@jonasborjesson.com
  */
-public class AddressParametersHeaderImpl extends ParametersImpl implements AddressParametersHeader {
+public class AddressParametersHeaderImpl extends ParametersImpl implements AddressParametersHeader, HeaderAddress {
 
     public static final Buffer TAG = Buffers.wrap("tag");
 
@@ -37,7 +38,7 @@ public class AddressParametersHeaderImpl extends ParametersImpl implements Addre
     }
 
     @Override
-    public Address getAddress() {
+    public Address getAddressIO() {
         return this.address;
     }
 
@@ -92,6 +93,16 @@ public class AddressParametersHeaderImpl extends ParametersImpl implements Addre
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void setAddress(javax.sip.address.Address address) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public javax.sip.address.Address getAddress() {
+        return address;
     }
 
 }

@@ -16,11 +16,11 @@ import java.io.IOException;
 /**
  * @author jonas@jonasborjesson.com
  */
-public interface CSeqHeader extends SipHeader {
+public interface CSeqHeader extends SipHeader,javax.sip.header.CSeqHeader {
 
     Buffer NAME = Buffers.wrap("CSeq");
 
-    Buffer getMethod();
+    Buffer getMethodIO();
 
     long getSeqNumber();
 

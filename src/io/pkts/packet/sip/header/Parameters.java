@@ -33,7 +33,7 @@ public interface Parameters extends SipHeader {
      * @throws IllegalArgumentException
      *             in case the name is null.
      */
-    Buffer getParameter(Buffer name) throws SipParseException, IllegalArgumentException;
+    Buffer getParameterIO(Buffer name) throws SipParseException, IllegalArgumentException;
 
     /**
      * Same as {@link #getParameter(Buffer)}.
@@ -45,7 +45,7 @@ public interface Parameters extends SipHeader {
      * @throws IllegalArgumentException
      *             in case the name is null.
      */
-    Buffer getParameter(String name) throws SipParseException, IllegalArgumentException;
+    Buffer getParameterIO(String name) throws SipParseException, IllegalArgumentException;
 
     /**
      * Sets the value of the specified parameter. If there already is a

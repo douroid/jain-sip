@@ -15,7 +15,7 @@ import java.util.function.Function;
 /**
  * @author jonas@jonasborjesson.com
  */
-public class SipHeaderImpl implements SipHeader {
+public class SipHeaderImpl implements SipHeader, javax.sip.header.Header {
 
     private final Buffer name;
 
@@ -35,7 +35,7 @@ public class SipHeaderImpl implements SipHeader {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getName() {
+    public Buffer getNameIO() {
         return this.name;
     }
 
@@ -49,7 +49,7 @@ public class SipHeaderImpl implements SipHeader {
 
     @Override
     public String toString() {
-        return getName().toString() + ": " + getValue();
+        return getNameIO().toString() + ": " + getValue();
     }
 
     @Override
@@ -96,6 +96,11 @@ public class SipHeaderImpl implements SipHeader {
         final Buffer buffer = Buffers.createBuffer(1024);
         transferValue(buffer);
         return new SipHeaderImpl(this.name.clone(), buffer);
+    }
+
+    @Override
+    public String getName() {
+        return getNameIO().toString();
     }
 
 }

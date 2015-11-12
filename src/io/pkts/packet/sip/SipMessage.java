@@ -1,5 +1,6 @@
 package io.pkts.packet.sip;
 
+import gov.nist.javax.sip.message.SIPMessage;
 import static io.pkts.packet.sip.impl.PreConditions.assertNotEmpty;
 import static io.pkts.packet.sip.impl.PreConditions.assertNotNull;
 import io.pkts.buffer.Buffer;
@@ -20,7 +21,6 @@ import io.pkts.packet.sip.impl.SipParser;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Packet representing a SIP message.
@@ -28,7 +28,7 @@ import java.util.Map;
  * @author jonas@jonasborjesson.com
  * 
  */
-public interface SipMessage extends Cloneable {
+public interface SipMessage extends Cloneable, javax.sip.message.Message {
 
     /**
      * The first line of a sip message, which is either a request or a response
@@ -123,7 +123,7 @@ public interface SipMessage extends Cloneable {
      * 
      * @return
      */
-    Buffer getRawContent();
+    Buffer getRawContentIO();
 
     /**
      * Checks whether this {@link SipMessage} is carrying anything in its
@@ -139,7 +139,7 @@ public interface SipMessage extends Cloneable {
      * 
      * @return
      */
-    Buffer getMethod() throws SipParseException;
+    Buffer getMethodIO() throws SipParseException;
 
     /**
      * Get the header as a buffer
@@ -467,7 +467,7 @@ public interface SipMessage extends Cloneable {
      */
     SipMessage clone();
     
-    Map<Buffer, List<SipHeader>> getHeaderMap();
+    //Map<Buffer, List<SipHeader>> getHeaderMap();
 
     /**
      * Frame the supplied buffer into a {@link SipMessage}. No deep analysis of the message will be

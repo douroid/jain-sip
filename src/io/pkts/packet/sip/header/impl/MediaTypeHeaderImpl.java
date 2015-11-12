@@ -36,7 +36,7 @@ public abstract class MediaTypeHeaderImpl extends ParametersImpl implements Medi
      * {@inheritDoc}
      */
     @Override
-    public Buffer getContentType() {
+    public Buffer getContentTypeIO() {
         return this.mType;
     }
 
@@ -44,7 +44,7 @@ public abstract class MediaTypeHeaderImpl extends ParametersImpl implements Medi
      * {@inheritDoc}
      */
     @Override
-    public Buffer getContentSubType() {
+    public Buffer getContentSubTypeIO() {
         return this.subType;
     }
 

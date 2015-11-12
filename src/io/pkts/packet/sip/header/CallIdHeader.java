@@ -12,7 +12,7 @@ import io.pkts.packet.sip.header.impl.CallIdHeaderImpl;
 /**
  * @author jonas@jonasborjesson.com
  */
-public interface CallIdHeader extends SipHeader {
+public interface CallIdHeader extends SipHeader,javax.sip.header.CallIdHeader  {
 
     Buffer NAME = Buffers.wrap("Call-ID");
 
@@ -21,7 +21,7 @@ public interface CallIdHeader extends SipHeader {
      */
     Buffer COMPACT_NAME = Buffers.wrap("i");
 
-    Buffer getCallId();
+    Buffer getCallIdIO();
 
     @Override
     CallIdHeader clone();

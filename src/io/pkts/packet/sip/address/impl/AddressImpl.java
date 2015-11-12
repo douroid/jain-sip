@@ -13,6 +13,7 @@ import io.pkts.packet.sip.address.URI;
 import io.pkts.packet.sip.impl.SipParser;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 /**
  * @author jonas@jonasborjesson.com
@@ -76,7 +77,7 @@ public final class AddressImpl implements Address {
      * @return
      */
     @Override
-    public Buffer getDisplayName() {
+    public Buffer getDisplayNameIO() {
         return this.displayName;
     }
 
@@ -236,4 +237,31 @@ public final class AddressImpl implements Address {
             }
         }
     }
+
+    @Override
+    public void setDisplayName(String displayName) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getDisplayName() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setURI(javax.sip.address.URI uri) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public boolean isWildcard() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    public Object clone(){
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+            
+            
 }

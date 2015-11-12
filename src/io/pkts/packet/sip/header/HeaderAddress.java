@@ -10,6 +10,6 @@ import io.pkts.packet.sip.address.Address;
  */
 public interface HeaderAddress {
 
-    Address getAddress();
+    Address getAddressIO();
 
 }

@@ -7,6 +7,9 @@ import io.pkts.buffer.Buffer;
 import io.pkts.buffer.Buffers;
 import io.pkts.packet.sip.header.CSeqHeader;
 import io.pkts.packet.sip.impl.SipParser;
+import static java.lang.Math.toIntExact;
+import java.text.ParseException;
+import javax.sip.InvalidArgumentException;
 
 
 /**
@@ -31,7 +34,7 @@ public final class CSeqHeaderImpl extends SipHeaderImpl implements CSeqHeader {
      * {@inheritDoc}
      */
     @Override
-    public Buffer getMethod() {
+    public Buffer getMethodIO() {
         return this.method;
     }
 
@@ -65,6 +68,31 @@ public final class CSeqHeaderImpl extends SipHeaderImpl implements CSeqHeader {
     @Override
     public CSeqHeader ensure() {
         return this;
+    }
+
+    @Override
+    public void setMethod(String method) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getMethod() {
+        return getMethodIO().toString();
+    }
+
+    @Override
+    public void setSequenceNumber(int sequenceNumber) throws InvalidArgumentException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getSequenceNumber() {
+        return toIntExact(getSeqNumber());
+    }
+
+    @Override
+    public void setSeqNumber(long sequenceNumber) throws InvalidArgumentException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

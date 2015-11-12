@@ -55,14 +55,14 @@ import static io.pkts.packet.sip.impl.PreConditions.assertNotEmpty;
  * 
  * @author jonas@jonasborjesson.com
  */
-public interface SipHeader extends Cloneable {
+public interface SipHeader extends Cloneable, javax.sip.header.Header {
 
     /**
      * Get the name of the header
      * 
      * @return
      */
-    Buffer getName();
+    Buffer getNameIO();
 
     /**
      * Get the value of the buffer

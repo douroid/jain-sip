@@ -13,7 +13,7 @@ import io.pkts.packet.sip.header.impl.ContentTypeHeaderImpl;
  * 
  * @author jonas@jonasborjesson.com
  */
-public interface ContentTypeHeader extends SipHeader, MediaTypeHeader, Parameters {
+public interface ContentTypeHeader extends SipHeader, MediaTypeHeader, Parameters,javax.sip.header.ContentTypeHeader {
 
     Buffer NAME = Buffers.wrap("Content-Type");
 

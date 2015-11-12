@@ -9,6 +9,16 @@ import io.pkts.packet.sip.SipResponse;
 import io.pkts.packet.sip.header.CSeqHeader;
 import io.pkts.packet.sip.header.SipHeader;
 import io.pkts.packet.sip.header.ViaHeader;
+import java.text.ParseException;
+import java.util.ListIterator;
+import javax.sip.SipException;
+import javax.sip.header.ContentDispositionHeader;
+import javax.sip.header.ContentEncodingHeader;
+import javax.sip.header.ContentLanguageHeader;
+import javax.sip.header.ContentLengthHeader;
+import javax.sip.header.ContentTypeHeader;
+import javax.sip.header.ExpiresHeader;
+import javax.sip.header.Header;
 
 /**
  * @author jonas@jonasborjesson.com
@@ -33,7 +43,7 @@ public final class SipResponseImpl extends SipMessageImpl implements SipResponse
     }
     
     @Override
-    public Buffer getReasonPhrase() {
+    public Buffer getReasonPhraseIO() {
         return getResponseLine().getReason().slice();
     }
 
@@ -43,8 +53,8 @@ public final class SipResponseImpl extends SipMessageImpl implements SipResponse
      * @throws SipParseException
      */
     @Override
-    public Buffer getMethod() throws SipParseException {
-        return getCSeqHeader().getMethod();
+    public Buffer getMethodIO() throws SipParseException {
+        return getCSeqHeader().getMethodIO();
     }
 
     /**
@@ -159,6 +169,26 @@ public final class SipResponseImpl extends SipMessageImpl implements SipResponse
 
         final Buffer buffer = header.getValue();
         return ViaHeader.frame(buffer);
+    }
+
+    @Override
+    public void setStatusCode(int statusCode) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public int getStatusCode() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void setReasonPhrase(String reasonPhrase) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getReasonPhrase() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

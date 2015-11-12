@@ -7,6 +7,8 @@ import io.pkts.buffer.Buffer;
 import io.pkts.buffer.Buffers;
 import io.pkts.packet.sip.SipParseException;
 import io.pkts.packet.sip.header.ContentTypeHeader;
+import java.text.ParseException;
+import java.util.Iterator;
 
 
 /**
@@ -37,4 +39,25 @@ public final class ContentTypeHeaderImpl extends MediaTypeHeaderImpl implements 
     public ContentTypeHeader ensure() {
         return this;
     }
+
+    @Override
+    public void setContentType(String contentType) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getContentType() {
+        return getContentTypeIO().toString();
+    }
+
+    @Override
+    public void setContentSubType(String contentSubType) throws ParseException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getContentSubType() {
+        return getContentSubTypeIO().toString();
+    }
+
 }

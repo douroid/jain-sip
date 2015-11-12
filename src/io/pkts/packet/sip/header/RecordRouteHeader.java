@@ -34,7 +34,7 @@ import io.pkts.packet.sip.header.impl.RecordRouteHeaderImpl;
  * 
  * @author jonas@jonasborjesson.com
  */
-public interface RecordRouteHeader extends AddressParametersHeader {
+public interface RecordRouteHeader extends AddressParametersHeader,javax.sip.header.RecordRouteHeader {
 
     Buffer NAME = Buffers.wrap("Record-Route");
 

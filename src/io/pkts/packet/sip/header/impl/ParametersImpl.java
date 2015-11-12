@@ -5,8 +5,11 @@ package io.pkts.packet.sip.header.impl;
 
 import static io.pkts.packet.sip.impl.PreConditions.assertNotNull;
 import io.pkts.buffer.Buffer;
+import io.pkts.buffer.Buffers;
 import io.pkts.packet.sip.SipParseException;
 import io.pkts.packet.sip.header.Parameters;
+import java.text.ParseException;
+import java.util.Iterator;
 
 import java.util.function.Supplier;
 
@@ -14,7 +17,7 @@ import java.util.function.Supplier;
 /**
  * @author jonas@jonasborjesson.com
  */
-public abstract class ParametersImpl extends SipHeaderImpl implements Parameters {
+public abstract class ParametersImpl extends SipHeaderImpl implements Parameters,javax.sip.header.Parameters {
 
     private final ParametersSupport support;
 
@@ -29,12 +32,12 @@ public abstract class ParametersImpl extends SipHeaderImpl implements Parameters
     }
 
     @Override
-    public Buffer getParameter(final Buffer name) throws SipParseException {
+    public Buffer getParameterIO(final Buffer name) throws SipParseException {
         return this.support.getParameter(name);
     }
 
     @Override
-    public Buffer getParameter(final String name) throws SipParseException {
+    public Buffer getParameterIO(final String name) throws SipParseException {
         return this.support.getParameter(name);
     }
 
@@ -64,5 +67,29 @@ public abstract class ParametersImpl extends SipHeaderImpl implements Parameters
     protected void transferValue(final Buffer dst) {
         this.support.transferValue(dst);
     }
+    
+
+    @Override
+    public String getParameter(String name)
+    {
+        return getParameterIO(name).toString();
+    }
+
+
+    @Override
+    public void setParameter(String name, String value) throws ParseException
+    {
+        setParameter(Buffers.wrap(name), Buffers.wrap(value));
+    }
+
+
+    public Iterator getParameterNames() {
+        throw new UnsupportedOperationException();
+    }
+
+
+    public void removeParameter(String name) {
+        throw new UnsupportedOperationException();        
+    } 
 
 }
