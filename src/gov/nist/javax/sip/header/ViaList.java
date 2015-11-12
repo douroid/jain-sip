@@ -28,9 +28,11 @@
  ******************************************************************************/
 package gov.nist.javax.sip.header;
 
+import io.pkts.packet.sip.header.SipHeader;
 import javax.sip.header.*;
 
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * Keeps a list and a hashtable of via header functions.
@@ -54,6 +56,10 @@ public final class ViaList extends SIPHeaderList<Via> {
      * Default Constructor.
      */
     public ViaList() {
+        super(Via.class, ViaHeader.NAME);
+    }
+    
+    public ViaList(List<SipHeader> list) {
         super(Via.class, ViaHeader.NAME);
     }
 

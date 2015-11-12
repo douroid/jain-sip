@@ -37,6 +37,7 @@ import java.security.MessageDigest;
 import java.util.*;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import javax.sip.header.ViaHeader;
 
 /**
  * A few utilities that are used in various places by the stack. This is used to
@@ -204,7 +205,7 @@ public class Utils implements UtilsExt {
     }
 
     public boolean responseBelongsToUs(SIPResponse response) {
-        Via topmostVia = response.getTopmostVia();
+        ViaHeader topmostVia = response.getTopmostVia();
         String branch = topmostVia.getBranch();
         return branch != null && branch.startsWith(
                    SIPConstants.BRANCH_MAGIC_COOKIE + "-" + this.signature);

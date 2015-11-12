@@ -1,7 +1,6 @@
 package gov.nist.javax.sip.stack;
 
 import gov.nist.javax.sip.ClientTransactionExt;
-import gov.nist.javax.sip.header.Contact;
 import gov.nist.javax.sip.header.Event;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.message.SIPMessage;
@@ -13,6 +12,7 @@ import javax.sip.Dialog;
 import javax.sip.ObjectInUseException;
 import javax.sip.SipException;
 import javax.sip.address.Hop;
+import javax.sip.header.ContactHeader;
 import javax.sip.message.Request;
 
 public interface SIPClientTransaction extends ClientTransactionExt, SIPTransaction, ServerResponseInterface {
@@ -220,7 +220,7 @@ public interface SIPClientTransaction extends ClientTransactionExt, SIPTransacti
   /**
    * @return the originalRequestFromTag
    */
-  public abstract Contact getOriginalRequestContact();
+  public abstract ContactHeader getOriginalRequestContact();
 
   /**
    * @return the originalRequestFromTag

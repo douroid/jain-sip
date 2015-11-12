@@ -35,7 +35,6 @@ import gov.nist.core.LogLevels;
 import gov.nist.core.LogWriter;
 import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.address.SipUri;
-import gov.nist.javax.sip.header.Contact;
 import gov.nist.javax.sip.header.Event;
 import gov.nist.javax.sip.header.ReferTo;
 import gov.nist.javax.sip.header.RetryAfter;
@@ -64,6 +63,7 @@ import javax.sip.ServerTransaction;
 import javax.sip.SipException;
 import javax.sip.SipProvider;
 import javax.sip.TransactionState;
+import javax.sip.header.ContactHeader;
 import javax.sip.header.EventHeader;
 import javax.sip.header.ReferToHeader;
 import javax.sip.header.ServerHeader;
@@ -153,14 +153,16 @@ class DialogFilter implements ServerRequestInterface, ServerResponseInterface {
 
             SIPResponse sipResponse = sipRequest
                     .createResponse(Response.BAD_REQUEST);
-            if (reasonPhrase != null)
-                sipResponse.setReasonPhrase(reasonPhrase);
+
             ServerHeader serverHeader = MessageFactoryImpl
                     .getDefaultServerHeader();
             if (serverHeader != null) {
                 sipResponse.setHeader(serverHeader);
             }
             try {
+                if (reasonPhrase != null){
+                    sipResponse.setReasonPhrase(reasonPhrase);                
+                }
                 if (sipRequest.getMethod().equals(Request.INVITE)) {
                     sipStack.addTransactionPendingAck(transaction);
                 }
@@ -292,7 +294,7 @@ class DialogFilter implements ServerRequestInterface, ServerResponseInterface {
                         "Sending 500 response for out of sequence message");
             SIPResponse sipResponse = sipRequest
                     .createResponse(Response.SERVER_INTERNAL_ERROR);
-            sipResponse.setReasonPhrase("Request out of order");
+            
             if (MessageFactoryImpl.getDefaultServerHeader() != null) {
                 ServerHeader serverHeader = MessageFactoryImpl
                         .getDefaultServerHeader();
@@ -300,6 +302,7 @@ class DialogFilter implements ServerRequestInterface, ServerResponseInterface {
             }
 
             try {
+                sipResponse.setReasonPhrase("Request out of order");
                 RetryAfter retryAfter = new RetryAfter();
                 retryAfter.setRetryAfter(10);
                 sipResponse.setHeader(retryAfter);
@@ -371,7 +374,7 @@ class DialogFilter implements ServerRequestInterface, ServerResponseInterface {
          * Forgive the sins of B2BUA's that like to record route ACK's
          */
         if (dialog != null && sipProvider != dialog.getSipProvider()) {
-            final Contact contact = dialog.getMyContactHeader();
+            final ContactHeader contact = dialog.getMyContactHeader();
             if (contact != null) {
                 SipUri contactUri = (SipUri) (contact.getAddress().getURI());
                 String ipAddress = contactUri.getHost();
@@ -1601,14 +1604,14 @@ class DialogFilter implements ServerRequestInterface, ServerResponseInterface {
         if (this.transactionChannel != null) {
             String originalFrom = ((SIPRequest) this.transactionChannel
                     .getRequest()).getFromTag();
-            if (originalFrom == null ^ sipResponse.getFrom().getTag() == null) {
+            if (originalFrom == null ^ sipResponse.getFromHeader().getTag() == null) {
                 if (logger.isLoggingEnabled(LogLevels.TRACE_DEBUG))
                     logger.logDebug(
                             "From tag mismatch -- dropping response");
                 return;
             }
             if (originalFrom != null
-                    && !originalFrom.equalsIgnoreCase(sipResponse.getFrom()
+                    && !originalFrom.equalsIgnoreCase(sipResponse.getFromHeader()
                             .getTag())) {
                 if (logger.isLoggingEnabled(LogLevels.TRACE_DEBUG))
                     logger.logDebug(
@@ -1620,7 +1623,7 @@ class DialogFilter implements ServerRequestInterface, ServerResponseInterface {
         boolean createDialog = false;
         if (SIPTransactionStack.isDialogCreated(method)
                 && sipResponse.getStatusCode() != 100
-                && sipResponse.getFrom().getTag() != null
+                && sipResponse.getFromHeader().getTag() != null
                 && sipResponse.getTo().getTag() != null && sipDialog == null) {
             // Issue 317 : for forked response even if automatic dialog support is not enabled
             // a dialog should be created in the case where the original Tx already have a default dialog

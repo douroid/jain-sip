@@ -66,10 +66,12 @@ import javax.sip.TimeoutEvent;
 import javax.sip.TransactionState;
 import javax.sip.address.Hop;
 import javax.sip.address.SipURI;
+import javax.sip.header.ContactHeader;
 import javax.sip.header.EventHeader;
 import javax.sip.header.ExpiresHeader;
 import javax.sip.header.RouteHeader;
 import javax.sip.header.TimeStampHeader;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 
 /*
@@ -222,7 +224,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
   private String originalRequestFromTag;
   private String originalRequestCallId;
   private Event originalRequestEventHeader;
-  private Contact originalRequestContact;
+  private ContactHeader originalRequestContact;
   private String originalRequestScheme;
 
   private transient Object transactionTimerLock = new Object();
@@ -344,7 +346,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
   public boolean isMessagePartOfTransaction(SIPMessage messageToTest) {
 
     // List of Via headers in the message to test
-    Via topMostViaHeader = messageToTest.getTopmostVia();
+    ViaHeader topMostViaHeader = messageToTest.getTopmostVia();
     // Flags whether the select message is part of this transaction
     boolean transactionMatches;
     String messageBranch = topMostViaHeader.getBranch();
@@ -1479,13 +1481,13 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
   public boolean checkFromTag(SIPResponse sipResponse) {
     String originalFromTag = getOriginalRequestFromTag();
     if (this.defaultDialog != null) {
-      if (originalFromTag == null ^ sipResponse.getFrom().getTag() == null) {
+      if (originalFromTag == null ^ sipResponse.getFromHeader().getTag() == null) {
         if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
           logger.logDebug("From tag mismatch -- dropping response");
         return false;
       }
       if (originalFromTag != null
-          && !originalFromTag.equalsIgnoreCase(sipResponse.getFrom().getTag()))
+          && !originalFromTag.equalsIgnoreCase(sipResponse.getFromHeader().getTag()))
       {
         if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
           logger.logDebug("From tag mismatch -- dropping response");
@@ -1964,7 +1966,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
    * @see gov.nist.javax.sip.stack.SIPClientTransaction#getOriginalRequestContact()
    */
   @Override
-  public Contact getOriginalRequestContact() {
+  public ContactHeader getOriginalRequestContact() {
     if (originalRequest == null) {
       return originalRequestContact;
     }

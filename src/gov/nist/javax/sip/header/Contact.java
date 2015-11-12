@@ -77,6 +77,12 @@ public final  class Contact
     public Contact() {
         super(NAME);
     }
+    
+    /** Default constructor.
+     */
+    public Contact(io.pkts.packet.sip.header.ContactHeader hdr) {
+        super(NAME);
+    }    
 
     /** Set a parameter.
     */

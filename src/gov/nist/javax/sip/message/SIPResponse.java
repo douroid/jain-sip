@@ -28,17 +28,8 @@
  *******************************************************************************/
 package gov.nist.javax.sip.message;
 
-import gov.nist.core.InternalErrorHandler;
-import gov.nist.javax.sip.header.CSeq;
-import gov.nist.javax.sip.header.CallID;
-import gov.nist.javax.sip.header.From;
 import gov.nist.javax.sip.header.StatusLine;
-import gov.nist.javax.sip.header.To;
-import gov.nist.javax.sip.header.Via;
-
-import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
-import java.util.LinkedList;
 
 
 /**
@@ -51,11 +42,8 @@ import java.util.LinkedList;
  *
  *
  */
-public class SIPResponse
-    extends SIPMessage
-    implements javax.sip.message.Response, ResponseExt {
-    protected StatusLine statusLine;
-    private boolean isRetransmission = true;
+public interface SIPResponse extends SIPMessage, javax.sip.message.Response, ResponseExt {
+
    
     public static String getReasonPhrase(int rc) {
         String retval = null;
@@ -282,58 +270,15 @@ public class SIPResponse
 
     }
 
-    /** set the status code.
-     *@param statusCode is the status code to set.
-     *@throws IlegalArgumentException if invalid status code.
-     */
-    public void setStatusCode(int statusCode) throws ParseException {
 
-      // RFC3261 defines statuscode as 3DIGIT, 606 is the highest officially
-      // defined code but extensions may add others (in theory up to 999,
-      // but in practice up to 699 since the 6xx range is defined as 'final error')
-        if (statusCode < 100 || statusCode > 699)
-            throw new ParseException("bad status code", 0);
-        if (this.statusLine == null)
-            this.statusLine = new StatusLine();
-        this.statusLine.setStatusCode(statusCode);
-    }
 
     /**
      * Get the status line of the response.
      *@return StatusLine
      */
-    public StatusLine getStatusLine() {
-        return statusLine;
-    }
+    public StatusLine getStatusLine();
 
-    /** Get the staus code (conveniance function).
-     *@return the status code of the status line.
-     */
-    public int getStatusCode() {
-        return statusLine.getStatusCode();
-    }
 
-    /** Set the reason phrase.
-     *@param reasonPhrase the reason phrase.
-     *@throws IllegalArgumentException if null string
-     */
-    public void setReasonPhrase(String reasonPhrase) {
-        if (reasonPhrase == null)
-            throw new IllegalArgumentException("Bad reason phrase");
-        if (this.statusLine == null)
-            this.statusLine = new StatusLine();
-        this.statusLine.setReasonPhrase(reasonPhrase);
-    }
-
-    /** Get the reason phrase.
-     *@return the reason phrase.
-     */
-    public String getReasonPhrase() {
-        if (statusLine == null || statusLine.getReasonPhrase() == null)
-            return "";
-        else
-            return statusLine.getReasonPhrase();
-    }
 
     /** Return true if the response is a final response.
      *@param rc is the return code.
@@ -346,237 +291,41 @@ public class SIPResponse
     /** Is this a final response?
      *@return true if this is a final response.
      */
-    public boolean isFinalResponse() {
-        return isFinalResponse(statusLine.getStatusCode());
-    }
+    public boolean isFinalResponse();
 
     /**
      * Set the status line field.
      *@param sl Status line to set.
      */
-    public void setStatusLine(StatusLine sl) {
-        statusLine = sl;
-    }
+    public void setStatusLine(StatusLine sl);
 
-    /** Constructor.
-     */
-    public SIPResponse() {
-        super();
-    }
-    /**
-     * Print formatting function.
-     *Indent and parenthesize for pretty printing.
-     * Note -- use the encode method for formatting the message.
-     * Hack here to XMLize.
-     *
-     *@return a string for pretty printing.
-     */
-    public String debugDump() {
-        String superstring = super.debugDump();
-        stringRepresentation = "";
-        sprint(SIPResponse.class.getCanonicalName());
-        sprint("{");
-        if (statusLine != null) {
-            sprint(statusLine.debugDump());
-        }
-        sprint(superstring);
-        sprint("}");
-        return stringRepresentation;
-    }
 
     /**
      * Check the response structure. Must have from, to CSEQ and VIA
      * headers.
      */
-    public void checkHeaders() throws ParseException {
-        if (getCSeq() == null) {
-            throw new ParseException(CSeq.NAME+ " Is missing ", 0);
-        }
-        if (getTo() == null) {
-            throw new ParseException(To.NAME+ " Is missing ", 0);
-        }
-        if (getFrom() == null) {
-            throw new ParseException(From.NAME+ " Is missing ", 0);
-        }
-        if (getViaHeaders() == null) {
-            throw new ParseException(Via.NAME+ " Is missing ", 0);
-        }
-        if (getCallId() == null) {
-            throw new ParseException(CallID.NAME + " Is missing ", 0);
-        }
-
-
-        if (getStatusCode() > 699) {
-            throw new ParseException("Unknown error code!" + getStatusCode(), 0);
-        }
-
-    }
+    public void checkHeaders() throws ParseException;
 
     /**
      *  Encode the SIP Request as a string.
      *@return The string encoded canonical form of the message.
      */
 
-    public String encode() {
-        String retval;
-        if (statusLine != null)
-            retval = statusLine.encode() + super.encode();
-        else
-            retval = super.encode();
-        return retval ;
-    }
-
-    /** Encode the message except for the body.
-    *
-    *@return The string except for the body.
-    */
-
-    public StringBuilder encodeMessage(StringBuilder retval) {
-//        String retval;
-        if (statusLine != null) {
-            statusLine.encode(retval);
-            super.encodeSIPHeaders(retval);
-        } else {
-            retval = super.encodeSIPHeaders(retval);
-        }
-        return retval;
-    }
+    public String encode();
 
 
 
-    /** Get this message as a list of encoded strings.
-     *@return LinkedList containing encoded strings for each header in
-     *   the message.
-     */
-
-    public LinkedList getMessageAsEncodedStrings() {
-        LinkedList retval = super.getMessageAsEncodedStrings();
-
-        if (statusLine != null)
-            retval.addFirst(statusLine.encode());
-        return retval;
-
-    }
-
-    /**
-     * Make a clone (deep copy) of this object.
-     *@return a deep copy of this object.
-     */
-
-    public Object clone() {
-        SIPResponse retval = (SIPResponse) super.clone();
-        if (this.statusLine != null)
-            retval.statusLine = (StatusLine) this.statusLine.clone();
-        return retval;
-    }
 
 
-    /**
-     * Compare for equality.
-     *@param other other object to compare with.
-     */
-    public boolean equals(Object other) {
-        if (!this.getClass().equals(other.getClass()))
-            return false;
-        SIPResponse that = (SIPResponse) other;
-        return statusLine.equals(that.statusLine) && super.equals(other);
-    }
 
-    /**
-     * Match with a template.
-     *@param matchObj template object to match ourselves with (null
-     * in any position in the template object matches wildcard)
-     */
-    public boolean match(Object matchObj) {
-        if (matchObj == null)
-            return true;
-        else if (!matchObj.getClass().equals(this.getClass())) {
-            return false;
-        } else if (matchObj == this)
-            return true;
-        SIPResponse that = (SIPResponse) matchObj;
-
-        StatusLine rline = that.statusLine;
-        if (this.statusLine == null && rline != null)
-            return false;
-        else if (this.statusLine == rline)
-            return super.match(matchObj);
-        else {
-
-            return statusLine.match(that.statusLine) && super.match(matchObj);
-        }
-
-    }
-
-    /** Encode this into a byte array.
-     * This is used when the body has been set as a binary array
-     * and you want to encode the body as a byte array for transmission.
-     *
-     *@return a byte array containing the SIPRequest encoded as a byte
-     *  array.
-     */
-
-    public byte[] encodeAsBytes( String transport ) {
-        byte[] slbytes = null;
-        if (statusLine != null) {
-            try {
-                slbytes = statusLine.encode().getBytes("UTF-8");
-            } catch (UnsupportedEncodingException ex) {
-                InternalErrorHandler.handleException(ex);
-            }
-        }
-        byte[] superbytes = super.encodeAsBytes( transport );
-        byte[] retval = new byte[slbytes.length + superbytes.length];
-        System.arraycopy(slbytes, 0, retval, 0, slbytes.length);
-        System.arraycopy(superbytes, 0, retval, slbytes.length,
-                superbytes.length);
-        return retval;
-    }
-
-    /**
-     * Get the encoded first line.
-     *
-     *@return the status line encoded.
-     *
-     */
-    public String getFirstLine() {
-        if (this.statusLine == null)
-            return null;
-        else
-            return this.statusLine.encode();
-    }
-
-    public void setSIPVersion(String sipVersion) {
-        this.statusLine.setSipVersion(sipVersion);
-    }
-
-    public String getSIPVersion() {
-        return this.statusLine.getSipVersion();
-    }
-
-    public String toString() {
-        if (statusLine == null) return  "";
-        else return statusLine.encode() + super.encode();
-    }
-    
-    @Override
-    public void cleanUp() {
-//    	statusLine = null;
-    	super.cleanUp();
-    }
 
     /**
      * @param isRetransmission the isRetransmission to set
      */
-    public void setRetransmission(boolean isRetransmission) {
-        
-        this.isRetransmission = isRetransmission;
-    }
+    public void setRetransmission(boolean isRetransmission);
 
     /**
      * @return the isRetransmission
      */
-    public boolean isRetransmission() {
-        return isRetransmission;
-    }
+    public boolean isRetransmission();
 }

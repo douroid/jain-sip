@@ -25,8 +25,6 @@
  */
 package gov.nist.javax.sip.stack;
 
-import gov.nist.core.NamingThreadFactory;
-
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +37,7 @@ public class MultiPipelineExecutor<K> {
 	private ConcurrentHashMap<K, SemaphoreLinkedList<SemaphoreRunnable<K>>> map =
 			new ConcurrentHashMap<K, SemaphoreLinkedList<SemaphoreRunnable<K>>>();
 	public MultiPipelineExecutor(int threads) {
-		executor = Executors.newFixedThreadPool(threads, new NamingThreadFactory("jain_sip_multi_pipeline_executor"));
+		executor = Executors.newFixedThreadPool(threads);
 	}
 	public synchronized void addTask(K key, Runnable task) {
 		SemaphoreLinkedList<SemaphoreRunnable<K>> list = map.get(key);

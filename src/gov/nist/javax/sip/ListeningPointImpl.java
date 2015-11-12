@@ -44,6 +44,7 @@ import gov.nist.javax.sip.address.SipUri;
 import gov.nist.javax.sip.header.Contact;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.message.SIPRequest;
+import gov.nist.javax.sip.message.SIPRequestImpl;
 import gov.nist.javax.sip.stack.*;
 
 /**
@@ -253,7 +254,7 @@ public class ListeningPointImpl implements javax.sip.ListeningPoint, gov.nist.ja
         targetHostPort.setHost(new Host( ipAddress));
         targetHostPort.setPort(port);
         MessageChannel messageChannel = this.messageProcessor.createMessageChannel(targetHostPort);
-        SIPRequest siprequest = new SIPRequest();
+        SIPRequest siprequest = new SIPRequestImpl();//TODO use factory
         siprequest.setNullRequest();
         
         if(messageChannel instanceof ConnectionOrientedMessageChannel) {

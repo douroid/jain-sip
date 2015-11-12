@@ -31,6 +31,9 @@ package gov.nist.javax.sip.header;
 import javax.sip.address.URI;
 
 import gov.nist.javax.sip.address.*;
+import io.pkts.buffer.Buffer;
+import io.pkts.buffer.Buffers;
+import io.pkts.packet.sip.address.impl.SipURIImpl;
 
 /**
  * RequestLine of SIP Request.
@@ -48,11 +51,7 @@ public class RequestLine extends SIPObject implements SipRequestLine {
     /** uri field. Note that this can be a SIP URI or a generic URI
     * like tel URI.
      */
-    protected GenericURI uri;
-
-    /** method field.
-     */
-    protected String method;
+    protected io.pkts.packet.sip.impl.SipRequestLine reqLine;
 
     /** sipVersion field
      */
@@ -63,6 +62,12 @@ public class RequestLine extends SIPObject implements SipRequestLine {
     public RequestLine() {
         sipVersion = "SIP/2.0";
     }
+    
+    public RequestLine(io.pkts.packet.sip.impl.SipRequestLine reqLine) {
+        this.reqLine = reqLine;
+        sipVersion = "SIP/2.0";
+    }
+    
 
    
     /** Encode the request line as a String.
@@ -74,31 +79,22 @@ public class RequestLine extends SIPObject implements SipRequestLine {
     }
 
     public StringBuilder encode(StringBuilder buffer) {
-        if (method != null) {
-            buffer.append(method);
-            buffer.append(SP);
-        }
-        if (uri != null) {
-            uri.encode(buffer);
-            buffer.append(SP);
-        }
-        buffer.append(sipVersion);
-        buffer.append(NEWLINE);
         return buffer;
     }
 
     /* (non-Javadoc)
      * @see gov.nist.javax.sip.header.SipRequestLine#getUri()
      */
-    public GenericURI getUri() {
+    public URI getUri() {
+        GenericURI uri = new SipUri((io.pkts.packet.sip.address.SipURI)reqLine.getRequestUri());
         return uri;
     }
 
     /** Constructor given the request URI and the method.
     */
     public RequestLine(GenericURI requestURI, String method) {
-        this.uri = requestURI;
-        this.method = method;
+        
+        /*TODOreqLine = new io.pkts.packet.sip.impl.SipRequestLine(Buffers.wrap(method), requestURI);*/
         this.sipVersion = "SIP/2.0";
     }
 
@@ -106,7 +102,7 @@ public class RequestLine extends SIPObject implements SipRequestLine {
      * @see gov.nist.javax.sip.header.SipRequestLine#getMethod()
      */
     public String getMethod() {
-        return method;
+        return reqLine.getMethod().toString();
     }
 
     /* (non-Javadoc)
@@ -120,14 +116,14 @@ public class RequestLine extends SIPObject implements SipRequestLine {
      * @see gov.nist.javax.sip.header.SipRequestLine#setUri(gov.nist.javax.sip.address.GenericURI)
      */
     public void setUri(URI uri) {
-        this.uri = (GenericURI)uri;
+        //TODO reqLine = new io.pkts.packet.sip.impl.SipRequestLine(reqLine.getMethod(), uri);
     }
 
     /* (non-Javadoc)
      * @see gov.nist.javax.sip.header.SipRequestLine#setMethod(java.lang.String)
      */
     public void setMethod(String method) {
-        this.method = method;
+        //TODO reqLine = new io.pkts.packet.sip.impl.SipRequestLine(method, ((SipURIImpl)reqLine.getRequestUri()).toBuffer());
     }
 
     /* (non-Javadoc)
@@ -196,28 +192,30 @@ public class RequestLine extends SIPObject implements SipRequestLine {
             return false;
         }
         RequestLine that = (RequestLine) other;
-        if (this.method == null) {
-          if (that.method != null)
+        if (reqLine.getMethod() == null) {
+          if (that.reqLine.getMethod() != null)
             return false;
-        } else if (!this.method.equals(that.method))
+        } else if (!this.reqLine.getMethod().equals(that.reqLine.getMethod()))
           return false;
         if (this.sipVersion == null) {
           if (that.sipVersion != null)
             return false;
         } else if (!this.sipVersion.equals(that.sipVersion))
           return false;
-        if (this.uri == null) {
-          if (that.uri != null)
+        if (this.reqLine.getRequestUri() == null) {
+          if (that.reqLine.getRequestUri() != null)
             return false;
-        } else if (!this.uri.equals(that.uri))
+        } else if (!this.reqLine.getRequestUri().equals(that.reqLine.getRequestUri()))
           return false;
         return true;
     }
 
     public Object clone() {
         RequestLine retval = (RequestLine) super.clone();
-        if (this.uri != null)
-            retval.uri = (GenericURI) this.uri.clone();
+        /*TODO
+        if (this.reqLine.getRequestUri() != null)
+            retval.reqLine.getRequestUri() = this.reqLine.getRequestUri().clone();
+        */
         return retval;
     }
 }

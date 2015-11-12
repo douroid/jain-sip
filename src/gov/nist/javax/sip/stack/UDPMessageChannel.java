@@ -63,6 +63,7 @@ import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
 
 import javax.sip.address.Hop;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Response;
 
 /*
@@ -445,9 +446,9 @@ public class UDPMessageChannel extends MessageChannel implements
             }
             return;
         }
-        Via topMostVia = sipMessage.getTopmostVia();
+        Via topMostVia = (Via) sipMessage.getTopmostVia();
         // Check for the required headers.
-        if (sipMessage.getFrom() == null || sipMessage.getTo() == null
+        if (sipMessage.getFromHeader() == null || sipMessage.getTo() == null
                 || sipMessage.getCallId() == null
                 || sipMessage.getCSeq() == null || topMostVia == null) {
             String badmsg = new String(msgBytes);
@@ -456,7 +457,7 @@ public class UDPMessageChannel extends MessageChannel implements
                         .logError("bad message " + badmsg);
                 this.logger.logError(
                         ">>> Dropped Bad Msg " + "From = "
-                                + sipMessage.getFrom() + "To = "
+                                + sipMessage.getFromHeader() + "To = "
                                 + sipMessage.getTo() + "CallId = "
                                 + sipMessage.getCallId() + "CSeq = "
                                 + sipMessage.getCSeq() + "Via = "

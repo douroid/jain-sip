@@ -61,6 +61,10 @@ public final class To extends AddressParametersHeader implements
     public To() {
         super(TO,true);
     }
+    
+    public To(io.pkts.packet.sip.header.ToHeader hdr) {
+        super(TO,true);
+    }    
 
     /**
      * Generate a TO header from a FROM header

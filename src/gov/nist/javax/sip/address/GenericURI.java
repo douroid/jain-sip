@@ -63,6 +63,11 @@ public class GenericURI extends NetObject implements javax.sip.address.URI {
      */
     protected GenericURI() {
     }
+    
+    protected GenericURI(io.pkts.packet.sip.address.URI uri) {
+        //TODO
+        scheme = uri.getScheme().toString();
+    }    
 
     /** Constructor given the URI string
      * @param uriString The imbedded URI string.

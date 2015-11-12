@@ -86,6 +86,13 @@ public class SipUri extends GenericURI implements javax.sip.address.SipURI , Sip
         this.qheaders = new NameValueList();
         this.qheaders.setSeparator("&");
     }
+    
+    public SipUri(io.pkts.packet.sip.address.SipURI uri) {
+        this.scheme = SIP;
+        this.uriParms = new NameValueList();
+        this.qheaders = new NameValueList();
+        this.qheaders.setSeparator("&");
+    }    
 
     /** Constructor given the scheme.
     * The scheme must be either Sip or Sips

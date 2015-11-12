@@ -65,6 +65,7 @@ import javax.sip.Dialog;
 import javax.sip.IOExceptionEvent;
 import javax.sip.TransactionState;
 import javax.sip.address.SipURI;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
@@ -380,9 +381,9 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
 
         this.originalRequest = newOriginalRequest;
         this.originalRequestCSeqNumber = newOriginalRequest.getCSeq().getSeqNumber();
-        final Via topmostVia = newOriginalRequest.getTopmostVia();
+        final ViaHeader topmostVia = newOriginalRequest.getTopmostVia();
         this.originalRequestBranch = topmostVia.getBranch();
-        this.originalRequestHasPort = topmostVia.hasPort();
+        this.originalRequestHasPort = ((Via)topmostVia).hasPort();
         int originalRequestViaPort = topmostVia.getPort();
        
         if ( originalRequestViaPort == -1 ) {
@@ -1061,7 +1062,7 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
         // List of Via headers in the message to test
 //        ViaList viaHeaders;
         // Topmost Via header in the list
-        Via topViaHeader;
+        ViaHeader topViaHeader;
         // Branch code in the topmost Via header
         String messageBranch;
         // Flags whether the select message is part of this transaction
@@ -1099,8 +1100,8 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
                 // If the branch equals the branch in
                 // this message,
                 if (getBranch().equalsIgnoreCase(messageBranch)
-                        && topViaHeader.getSentBy().equals(
-                                origRequest.getTopmostVia().getSentBy())) {
+                        && ((Via)topViaHeader).getSentBy().equals(
+                                ((Via)origRequest.getTopmostVia()).getSentBy())) {
                     transactionMatches = true;
                     if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
                         logger.logDebug("returning  true");
@@ -1119,8 +1120,8 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
                         requestToTest.getRequestURI())
                         && origRequest.getTo().equals(
                                 requestToTest.getTo())
-                        && origRequest.getFrom().equals(
-                                requestToTest.getFrom())
+                        && origRequest.getFromHeader().equals(
+                                requestToTest.getFromHeader())
                         && origRequest.getCallId().getCallId().equals(
                                 requestToTest.getCallId().getCallId())
                         && origRequest.getCSeq().getSeqNumber() == requestToTest

@@ -62,6 +62,7 @@ import javax.sip.header.ContactHeader;
 import javax.sip.header.ContentTypeHeader;
 import javax.sip.header.ExpiresHeader;
 import javax.sip.header.RSeqHeader;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
@@ -427,7 +428,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
 
 
             } else {
-                Via via = transactionResponse.getTopmostVia();
+                ViaHeader via = transactionResponse.getTopmostVia();
                 String transport = via.getTransport();
                 if (transport == null)
                     throw new IOException("missing transport!");
@@ -561,7 +562,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
         if (isInviteTransaction() || !isTerminated()) {
 
             // Get the topmost Via header and its branch parameter
-            final Via topViaHeader = messageToTest.getTopmostVia();
+            final Via topViaHeader = (Via) messageToTest.getTopmostVia();
             if (topViaHeader != null) {
 
 //                topViaHeader = (Via) viaHeaders.getFirst();
@@ -592,8 +593,8 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                         transactionMatches = this.getMethod().equals(Request.CANCEL)
                                 && getBranch().equalsIgnoreCase(messageBranch)
                                 && topViaHeader.getSentBy().equals(
-                                         origRequest.getTopmostVia()
-                                                .getSentBy());
+                                         ((Via)origRequest.getTopmostVia()
+                                                 ).getSentBy());
 
                     } else {
                         // Matching server side transaction with only the
@@ -601,8 +602,8 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                         if(origRequest != null) {
                             transactionMatches = getBranch().equalsIgnoreCase(messageBranch)
                                 && topViaHeader.getSentBy().equals(
-                                          origRequest.getTopmostVia()
-                                                .getSentBy());
+                                          ((Via)origRequest.getTopmostVia()
+                                                  ).getSentBy());
                         } else {
                             transactionMatches = getBranch().equalsIgnoreCase(messageBranch)
                                 && topViaHeader.getSentBy().equals(originalRequestSentBy);
@@ -624,7 +625,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                     // to be part of an otherwise-matching INVITE transaction.
                     String originalFromTag = origRequest.getFromTag();
 
-                    String thisFromTag = messageToTest.getFrom().getTag();
+                    String thisFromTag = messageToTest.getFromHeader().getTag();
 
                     boolean skipFrom = (originalFromTag == null || thisFromTag == null);
 
@@ -886,7 +887,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                 // Make the topmost via headers match identically for the
                 // transaction rsponse.
                 if (!originalRequestHasPort)
-                    transactionResponse.getTopmostVia().removePort();
+                    ((Via)transactionResponse.getTopmostVia()).removePort();
             } catch (ParseException ex) {
                logger.logError("UnexpectedException",ex);
                throw new IOException("Unexpected exception");
@@ -1471,7 +1472,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                     && !sipResponse.getFromTag().equals(fromTag)) {
                 throw new SipException("From tag of request does not match response from tag");
             } else if (fromTag != null) {
-                sipResponse.getFrom().setTag(fromTag);
+                sipResponse.getFromHeader().setTag(fromTag);
             } else {
                 if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
                     logger.logDebug("WARNING -- Null From tag in request!!");
@@ -2038,7 +2039,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                 originalRequest.setInviteTransaction(null);
                 if(!getMethod().equalsIgnoreCase(Request.INVITE)) {
                     if(originalRequestSentBy == null) {
-                        originalRequestSentBy = originalRequest.getTopmostVia().getSentBy();
+                        originalRequestSentBy = ((Via)originalRequest.getTopmostVia()).getSentBy();
                     }
                     if(originalRequestFromTag == null) {
                         originalRequestFromTag = originalRequest.getFromTag();

@@ -46,7 +46,7 @@ import java.util.*;
  *
  * @version 1.2 $Revision: 1.16 $ $Date: 2005/10/09 18:47:53
  */
-public abstract class SIPHeaderList<HDR extends SIPHeader> extends SIPHeader implements java.util.List<HDR>, Header {
+public abstract class SIPHeaderList<HDR extends Header> extends SIPHeader implements java.util.List<HDR>, Header {
 
     private static boolean prettyEncode = false;
     /**
@@ -60,7 +60,13 @@ public abstract class SIPHeaderList<HDR extends SIPHeader> extends SIPHeader imp
         return this.headerName;
     }
 
-
+    private SIPHeaderList(Class<HDR> objclass, String hname,List<HDR> l) {
+        this();
+        this.headerName = hname;
+        this.myClass =  objclass;        
+        hlist = l;
+    }
+    
     private SIPHeaderList() {
         hlist = new LinkedList<HDR>();
     }
@@ -168,7 +174,7 @@ public abstract class SIPHeaderList<HDR extends SIPHeader> extends SIPHeader imp
                 ListIterator<HDR> li = hlist.listIterator();
                 while (li.hasNext()) {
                     HDR sipheader = (HDR) li.next();
-                    sipheader.encode(buffer);
+                    //sipheader.encode(buffer);
                 }
             } else {
                 // These can be concatenated together in an comma separated
@@ -333,7 +339,7 @@ public abstract class SIPHeaderList<HDR extends SIPHeader> extends SIPHeader imp
 
         for (Iterator<HDR> it = hlist.iterator(); it.hasNext();) {
             HDR sipHeader = (HDR) it.next();
-            sprint(indent + sipHeader.debugDump());
+            //sprint(indent + sipHeader.debugDump());
         }
         sprint(indent + "}");
         return stringRepresentation;

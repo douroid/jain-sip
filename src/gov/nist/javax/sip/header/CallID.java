@@ -56,6 +56,10 @@ public class CallID
     public CallID() {
         super(NAME);
     }
+    
+    public CallID(io.pkts.packet.sip.header.CallIdHeader hdr) {
+        super(NAME);
+    }    
 
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)

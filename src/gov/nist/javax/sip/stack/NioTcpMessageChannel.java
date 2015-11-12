@@ -86,9 +86,7 @@ public class NioTcpMessageChannel extends ConnectionOrientedMessageChannel {
 	}
 	
 	public void readChannel() {
-                if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
-                    logger.logDebug("NioTcpMessageChannel::readChannel");
-                }
+		logger.logDebug("NioTcpMessageChannel::readChannel");
 		int bufferSize = 4096;
 		byte[] msg = new byte[bufferSize];
 		this.isRunning = true;

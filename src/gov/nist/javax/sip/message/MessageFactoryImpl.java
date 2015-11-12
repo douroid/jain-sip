@@ -129,7 +129,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                 || contentType == null)
             throw new NullPointerException("Null parameters");
 
-        SIPRequest sipRequest = new SIPRequest();
+        SIPRequest sipRequest = new SIPRequestImpl();
         sipRequest.setRequestURI(requestURI);
         sipRequest.setMethod(method);
         sipRequest.setCallId(callId);
@@ -187,7 +187,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                     "JAIN-SIP Exception, some parameters are missing"
                             + ", unable to create the request", 0);
 
-        SIPRequest sipRequest = new SIPRequest();
+        SIPRequest sipRequest = new SIPRequestImpl();
         sipRequest.setRequestURI(requestURI);
         sipRequest.setMethod(method);
         sipRequest.setCallId(callId);
@@ -238,7 +238,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                     "JAIN-SIP Exception, some parameters are missing"
                             + ", unable to create the request", 0);
 
-        SIPRequest sipRequest = new SIPRequest();
+        SIPRequest sipRequest = new SIPRequestImpl();
         sipRequest.setRequestURI(requestURI);
         sipRequest.setMethod(method);
         sipRequest.setCallId(callId);
@@ -292,7 +292,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                 || contentType == null)
             throw new NullPointerException(" unable to create the response");
 
-        SIPResponse sipResponse = new SIPResponse();
+        SIPResponse sipResponse = new SIPResponseImpl();
         StatusLine statusLine = new StatusLine();
         statusLine.setStatusCode(statusCode);
         String reasonPhrase = SIPResponse.getReasonPhrase(statusCode);
@@ -349,7 +349,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                 || contentType == null)
             throw new NullPointerException("Null params ");
 
-        SIPResponse sipResponse = new SIPResponse();
+        SIPResponse sipResponse = new SIPResponseImpl();
         sipResponse.setStatusCode(statusCode);
         sipResponse.setCallId(callId);
         sipResponse.setCSeq(cSeq);
@@ -396,7 +396,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                     "JAIN-SIP Exception, some parameters are missing"
                             + ", unable to create the response", 0);
 
-        SIPResponse sipResponse = new SIPResponse();
+        SIPResponse sipResponse = new SIPResponseImpl();
         sipResponse.setStatusCode(statusCode);
         sipResponse.setCallId(callId);
         sipResponse.setCSeq(cSeq);
@@ -552,7 +552,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                 || contentType == null)
             throw new NullPointerException("missing parameters");
 
-        SIPRequest sipRequest = new SIPRequest();
+        SIPRequest sipRequest = new SIPRequestImpl();
         sipRequest.setRequestURI(requestURI);
         sipRequest.setMethod(method);
         sipRequest.setCallId(callId);
@@ -603,7 +603,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                 || via == null || maxForwards == null || content == null
                 || contentType == null)
             throw new NullPointerException("missing parameters");
-        SIPResponse sipResponse = new SIPResponse();
+        SIPResponse sipResponse = new SIPResponseImpl();
         StatusLine statusLine = new StatusLine();
         statusLine.setStatusCode(statusCode);
         String reason = SIPResponse.getReasonPhrase(statusCode);
@@ -659,7 +659,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                 || via == null || maxForwards == null || content == null
                 || contentType == null)
             throw new NullPointerException("missing parameters");
-        SIPResponse sipResponse = new SIPResponse();
+        SIPResponse sipResponse = new SIPResponseImpl();
         StatusLine statusLine = new StatusLine();
         statusLine.setStatusCode(statusCode);
         String reason = SIPResponse.getReasonPhrase(statusCode);
@@ -691,7 +691,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
     public javax.sip.message.Request createRequest(String requestString)
             throws java.text.ParseException {
         if (requestString == null || requestString.equals("")) {
-            SIPRequest retval = new SIPRequest();
+            SIPRequest retval = new SIPRequestImpl();
             retval.setNullRequest();
             return retval;
         }
@@ -752,7 +752,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
     public Response createResponse(String responseString)
             throws java.text.ParseException {
         if (responseString == null)
-            return new SIPResponse();
+            return new SIPResponseImpl();
 
         StringMsgParser smp = new StringMsgParser();
 

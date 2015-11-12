@@ -46,7 +46,9 @@ import gov.nist.javax.sip.header.SIPHeader;
 import gov.nist.javax.sip.header.StatusLine;
 import gov.nist.javax.sip.message.SIPMessage;
 import gov.nist.javax.sip.message.SIPRequest;
+import gov.nist.javax.sip.message.SIPRequestImpl;
 import gov.nist.javax.sip.message.SIPResponse;
+import gov.nist.javax.sip.message.SIPResponseImpl;
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
@@ -55,7 +57,6 @@ import java.text.ParseException;
  * simpler and quicker.
  */
 
-import javax.xml.bind.DatatypeConverter;
 
 /**
  * Parse SIP message and parts of SIP messages such as URI's etc from memory and
@@ -234,7 +235,7 @@ public class StringMsgParser implements MessageParser {
     protected SIPMessage processFirstLine(String firstLine, ParseExceptionListener parseExceptionListener, byte[] msgBuffer) throws ParseException {
         SIPMessage message;
         if (!firstLine.startsWith(SIPConstants.SIP_VERSION_STRING)) {
-            message = new SIPRequest();
+            message = new SIPRequestImpl();//TODO use factory
             try {
                 RequestLine requestLine = new RequestLineParser(firstLine + "\n")
                         .parse();
@@ -252,7 +253,7 @@ public class StringMsgParser implements MessageParser {
 
             }
         } else {
-            message = new SIPResponse();
+            message = new SIPResponseImpl();//use factory
             try {
                 StatusLine sl = new StatusLineParser(firstLine + "\n").parse();
                 ((SIPResponse) message).setStatusLine(sl);
@@ -292,7 +293,7 @@ public class StringMsgParser implements MessageParser {
 
         try {
             SIPHeader sipHeader = headerParser.parse();
-            message.attachHeader(sipHeader, false);
+            message.addHeader(sipHeader);
         } catch (ParseException ex) {
             if (parseExceptionListener != null) {
                 String headerName = Lexer.getHeaderName(header);

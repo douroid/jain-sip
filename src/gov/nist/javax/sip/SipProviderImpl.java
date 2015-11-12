@@ -80,6 +80,7 @@ import javax.sip.TransactionState;
 import javax.sip.TransactionUnavailableException;
 import javax.sip.address.Hop;
 import javax.sip.header.CallIdHeader;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
@@ -376,7 +377,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
           
           sipRequest.getTopmostVia().setBranch(branchId);
         }
-        Via topmostVia = sipRequest.getTopmostVia();
+        ViaHeader topmostVia = sipRequest.getTopmostVia();
         
         //set port and transport if user hasn't already done this.
         if(topmostVia.getTransport() == null)
@@ -709,7 +710,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
              * not set already, dont overwrite CANCEL branch here..
              */
             if (!sipRequest.isNullRequest()) {
-                Via via = sipRequest.getTopmostVia();
+                ViaHeader via = sipRequest.getTopmostVia();
                 String branch = via.getBranch();
                 if (branch == null || branch.length() == 0) {
                     via.setBranch(sipRequest.getTransactionId());
@@ -760,7 +761,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
         if (!sipStack.isAlive())
             throw new SipException("Stack is stopped");
         SIPResponse sipResponse = (SIPResponse) response;
-        Via via = sipResponse.getTopmostVia();
+        ViaHeader via = sipResponse.getTopmostVia();
         if (via == null)
             throw new SipException("No via header in response!");
         SIPServerTransaction st = (SIPServerTransaction) sipStack.findTransaction((SIPMessage)response, true);

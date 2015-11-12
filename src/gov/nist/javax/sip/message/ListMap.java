@@ -28,71 +28,46 @@
  *******************************************************************************/
 package gov.nist.javax.sip.message;
 
-import gov.nist.javax.sip.header.Accept;
-import gov.nist.javax.sip.header.AcceptEncoding;
 import gov.nist.javax.sip.header.AcceptEncodingList;
-import gov.nist.javax.sip.header.AcceptLanguage;
 import gov.nist.javax.sip.header.AcceptLanguageList;
 import gov.nist.javax.sip.header.AcceptList;
-import gov.nist.javax.sip.header.AlertInfo;
 import gov.nist.javax.sip.header.AlertInfoList;
-import gov.nist.javax.sip.header.Allow;
-import gov.nist.javax.sip.header.AllowEvents;
 import gov.nist.javax.sip.header.AllowEventsList;
 import gov.nist.javax.sip.header.AllowList;
-import gov.nist.javax.sip.header.Authorization;
 import gov.nist.javax.sip.header.AuthorizationList;
-import gov.nist.javax.sip.header.CallInfo;
 import gov.nist.javax.sip.header.CallInfoList;
-import gov.nist.javax.sip.header.Contact;
 import gov.nist.javax.sip.header.ContactList;
-import gov.nist.javax.sip.header.ContentEncoding;
 import gov.nist.javax.sip.header.ContentEncodingList;
-import gov.nist.javax.sip.header.ContentLanguage;
 import gov.nist.javax.sip.header.ContentLanguageList;
-import gov.nist.javax.sip.header.ErrorInfo;
 import gov.nist.javax.sip.header.ErrorInfoList;
-import gov.nist.javax.sip.header.ExtensionHeaderImpl;
 import gov.nist.javax.sip.header.ExtensionHeaderList;
-import gov.nist.javax.sip.header.InReplyTo;
 import gov.nist.javax.sip.header.InReplyToList;
-import gov.nist.javax.sip.header.ProxyAuthenticate;
 import gov.nist.javax.sip.header.ProxyAuthenticateList;
-import gov.nist.javax.sip.header.ProxyAuthorization;
 import gov.nist.javax.sip.header.ProxyAuthorizationList;
-import gov.nist.javax.sip.header.ProxyRequire;
 import gov.nist.javax.sip.header.ProxyRequireList;
-import gov.nist.javax.sip.header.Reason;
 import gov.nist.javax.sip.header.ReasonList;
-import gov.nist.javax.sip.header.RecordRoute;
 import gov.nist.javax.sip.header.RecordRouteList;
-import gov.nist.javax.sip.header.Require;
 import gov.nist.javax.sip.header.RequireList;
-import gov.nist.javax.sip.header.Route;
 import gov.nist.javax.sip.header.RouteList;
 import gov.nist.javax.sip.header.SIPHeader;
 import gov.nist.javax.sip.header.SIPHeaderList;
-import gov.nist.javax.sip.header.Supported;
 import gov.nist.javax.sip.header.SupportedList;
-import gov.nist.javax.sip.header.Unsupported;
 import gov.nist.javax.sip.header.UnsupportedList;
-import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.header.ViaList;
 import gov.nist.javax.sip.header.WWWAuthenticate;
 import gov.nist.javax.sip.header.WWWAuthenticateList;
-import gov.nist.javax.sip.header.Warning;
 import gov.nist.javax.sip.header.WarningList;
 import gov.nist.javax.sip.header.ims.PAssertedIdentity;
 import gov.nist.javax.sip.header.ims.PAssertedIdentityList;
-import gov.nist.javax.sip.header.ims.PAssociatedURI;
+import gov.nist.javax.sip.header.ims.PAssociatedURIHeader;
 import gov.nist.javax.sip.header.ims.PAssociatedURIList;
-import gov.nist.javax.sip.header.ims.PMediaAuthorization;
+import gov.nist.javax.sip.header.ims.PMediaAuthorizationHeader;
 import gov.nist.javax.sip.header.ims.PMediaAuthorizationList;
 import gov.nist.javax.sip.header.ims.PVisitedNetworkID;
 import gov.nist.javax.sip.header.ims.PVisitedNetworkIDList;
-import gov.nist.javax.sip.header.ims.Path;
+import gov.nist.javax.sip.header.ims.PathHeader;
 import gov.nist.javax.sip.header.ims.PathList;
-import gov.nist.javax.sip.header.ims.Privacy;
+import gov.nist.javax.sip.header.ims.PrivacyHeader;
 import gov.nist.javax.sip.header.ims.PrivacyList;
 import gov.nist.javax.sip.header.ims.SecurityClient;
 import gov.nist.javax.sip.header.ims.SecurityClientList;
@@ -100,11 +75,37 @@ import gov.nist.javax.sip.header.ims.SecurityServer;
 import gov.nist.javax.sip.header.ims.SecurityServerList;
 import gov.nist.javax.sip.header.ims.SecurityVerify;
 import gov.nist.javax.sip.header.ims.SecurityVerifyList;
-import gov.nist.javax.sip.header.ims.ServiceRoute;
+import gov.nist.javax.sip.header.ims.ServiceRouteHeader;
 import gov.nist.javax.sip.header.ims.ServiceRouteList;
+import io.pkts.packet.sip.header.ViaHeader;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.sip.header.AcceptEncodingHeader;
+import javax.sip.header.AcceptHeader;
+import javax.sip.header.AcceptLanguageHeader;
+import javax.sip.header.AlertInfoHeader;
+import javax.sip.header.AllowEventsHeader;
+import javax.sip.header.AllowHeader;
+import javax.sip.header.AuthorizationHeader;
+import javax.sip.header.CallInfoHeader;
+import javax.sip.header.ContactHeader;
+import javax.sip.header.ContentEncodingHeader;
+import javax.sip.header.ContentLanguageHeader;
+import javax.sip.header.ErrorInfoHeader;
+import javax.sip.header.ExtensionHeader;
+import javax.sip.header.Header;
+import javax.sip.header.InReplyToHeader;
+import javax.sip.header.ProxyAuthenticateHeader;
+import javax.sip.header.ProxyAuthorizationHeader;
+import javax.sip.header.ProxyRequireHeader;
+import javax.sip.header.ReasonHeader;
+import javax.sip.header.RecordRouteHeader;
+import javax.sip.header.RequireHeader;
+import javax.sip.header.RouteHeader;
+import javax.sip.header.SupportedHeader;
+import javax.sip.header.UnsupportedHeader;
+import javax.sip.header.WarningHeader;
 
 /**
  * A map of which of the standard headers may appear as a list
@@ -133,68 +134,68 @@ public class ListMap {
          */
     	// jeand : using concurrent data structure to avoid excessive blocking
         headerListTable = new HashMap<Class<?>, Class<?>>(34);
-        headerListTable.put(ExtensionHeaderImpl.class, ExtensionHeaderList.class);
+        headerListTable.put(ExtensionHeader.class, ExtensionHeaderList.class);
 
-        headerListTable.put(Contact.class, ContactList.class);
+        headerListTable.put(ContactHeader.class, ContactList.class);
 
-        headerListTable.put(ContentEncoding.class, ContentEncodingList.class);
+        headerListTable.put(ContentEncodingHeader.class, ContentEncodingList.class);
 
-        headerListTable.put(Via.class, ViaList.class);
+        headerListTable.put(ViaHeader.class, ViaList.class);
 
         headerListTable.put(WWWAuthenticate.class, WWWAuthenticateList.class);
 
-        headerListTable.put(Accept.class, AcceptList.class);
+        headerListTable.put(AcceptHeader.class, AcceptList.class);
 
-        headerListTable.put(AcceptEncoding.class, AcceptEncodingList.class);
+        headerListTable.put(AcceptEncodingHeader.class, AcceptEncodingList.class);
 
-        headerListTable.put(AcceptLanguage.class, AcceptLanguageList.class);
+        headerListTable.put(AcceptLanguageHeader.class, AcceptLanguageList.class);
 
-        headerListTable.put(ProxyRequire.class, ProxyRequireList.class);
+        headerListTable.put(ProxyRequireHeader.class, ProxyRequireList.class);
 
-        headerListTable.put(Route.class, RouteList.class);
+        headerListTable.put(RouteHeader.class, RouteList.class);
 
-        headerListTable.put(Require.class, RequireList.class);
+        headerListTable.put(RequireHeader.class, RequireList.class);
 
-        headerListTable.put(Warning.class, WarningList.class);
+        headerListTable.put(WarningHeader.class, WarningList.class);
 
-        headerListTable.put(Unsupported.class, UnsupportedList.class);
+        headerListTable.put(UnsupportedHeader.class, UnsupportedList.class);
 
-        headerListTable.put(AlertInfo.class, AlertInfoList.class);
+        headerListTable.put(AlertInfoHeader.class, AlertInfoList.class);
 
-        headerListTable.put(CallInfo.class, CallInfoList.class);
+        headerListTable.put(CallInfoHeader.class, CallInfoList.class);
 
-        headerListTable.put(ProxyAuthenticate.class,ProxyAuthenticateList.class);
+        headerListTable.put(ProxyAuthenticateHeader.class,ProxyAuthenticateList.class);
 
-        headerListTable.put(ProxyAuthorization.class, ProxyAuthorizationList.class);
+        headerListTable.put(ProxyAuthorizationHeader.class, ProxyAuthorizationList.class);
 
-        headerListTable.put(Authorization.class, AuthorizationList.class);
+        headerListTable.put(AuthorizationHeader.class, AuthorizationList.class);
 
-        headerListTable.put(Allow.class, AllowList.class);
+        headerListTable.put(AllowHeader.class, AllowList.class);
         
         // http://java.net/jira/browse/JSIP-410
-        headerListTable.put(AllowEvents.class, AllowEventsList.class);
+        headerListTable.put(AllowEventsHeader.class, AllowEventsList.class);
 
-        headerListTable.put(RecordRoute.class, RecordRouteList.class);
+        headerListTable.put(RecordRouteHeader.class, RecordRouteList.class);
 
-        headerListTable.put(ContentLanguage.class, ContentLanguageList.class);
+        headerListTable.put(ContentLanguageHeader.class, ContentLanguageList.class);
 
-        headerListTable.put(ErrorInfo.class, ErrorInfoList.class);
+        headerListTable.put(ErrorInfoHeader.class, ErrorInfoList.class);
 
-        headerListTable.put(Supported.class, SupportedList.class);
+        headerListTable.put(SupportedHeader.class, SupportedList.class);
 
-        headerListTable.put(InReplyTo.class,InReplyToList.class);
+        headerListTable.put(InReplyToHeader.class,InReplyToList.class);
 
         // IMS headers.
 
-        headerListTable.put(PAssociatedURI.class, PAssociatedURIList.class);
+        headerListTable.put(PAssociatedURIHeader.class, PAssociatedURIList.class);
 
-        headerListTable.put(PMediaAuthorization.class, PMediaAuthorizationList.class);
+        headerListTable.put(PMediaAuthorizationHeader.class, PMediaAuthorizationList.class);
 
-        headerListTable.put(Path.class, PathList.class);
+        headerListTable.put(PathHeader.class, PathList.class);
 
-        headerListTable.put(Privacy.class,PrivacyList.class);
+        headerListTable.put(PrivacyHeader.class,PrivacyList.class);
 
-        headerListTable.put(ServiceRoute.class, ServiceRouteList.class);
+        headerListTable.put(ServiceRouteHeader.class, ServiceRouteList.class);
 
         headerListTable.put(PVisitedNetworkID.class, PVisitedNetworkIDList.class);
 
@@ -207,7 +208,7 @@ public class ListMap {
         headerListTable.put(PAssertedIdentity.class, PAssertedIdentityList.class);
         
         // https://java.net/jira/browse/JSIP-460
-        headerListTable.put(Reason.class, ReasonList.class);
+        headerListTable.put(ReasonHeader.class, ReasonList.class);
 
         initialized = true;
 
@@ -216,11 +217,11 @@ public class ListMap {
     /**
      * return true if this has an associated list object.
      */
-    static public boolean hasList(SIPHeader sipHeader) {
+    static public boolean hasList(Header sipHeader) {
         if (sipHeader instanceof SIPHeaderList)
             return false;
         else {
-            Class<?> headerClass = sipHeader.getClass();
+            Class<?> headerClass = sipHeader.getClass().getInterfaces()[0];
             return headerListTable.get(headerClass) != null;
         }
     }
@@ -231,14 +232,14 @@ public class ListMap {
     static public boolean hasList(Class<?> sipHdrClass) {
         if (!initialized)
             initializeListMap();
-        return headerListTable.get(sipHdrClass) != null;
+        return headerListTable.get(sipHdrClass.getInterfaces()[0]) != null;
     }
     
     /**
      * Mark a listable Header 
      */
-    static public void addListHeader(Class<? extends SIPHeader> sipHeaderClass,
-                                     Class<? extends SIPHeaderList<? extends SIPHeader>> sipHeaderListClass)
+    static public void addListHeader(Class<? extends Header> sipHeaderClass,
+                                     Class<? extends SIPHeaderList<? extends Header>> sipHeaderListClass)
     {
       headerListTable.put(sipHeaderClass, sipHeaderListClass);
     }
@@ -249,20 +250,20 @@ public class ListMap {
     static public Class<?> getListClass(Class<?> sipHdrClass) {
         if (!initialized)
             initializeListMap();
-        return (Class<?>) headerListTable.get(sipHdrClass);
+        return (Class<?>) headerListTable.get(sipHdrClass.getInterfaces()[0]);
     }
 
     /**
      * Return a list object for this header if it has an associated list object.
      */
     @SuppressWarnings("unchecked")
-    static public SIPHeaderList<SIPHeader> getList(SIPHeader sipHeader) {
+    static public SIPHeaderList<Header> getList(Header sipHeader) {
         if (!initialized)
             initializeListMap();
         try {
             Class<?> headerClass = sipHeader.getClass();
-            Class<?> listClass =  headerListTable.get(headerClass);
-            SIPHeaderList<SIPHeader> shl = (SIPHeaderList<SIPHeader>) listClass.newInstance();
+            Class<?> listClass =  headerListTable.get(headerClass.getInterfaces()[0]);
+            SIPHeaderList<Header> shl = (SIPHeaderList<Header>) listClass.newInstance();
             shl.setHeaderName(sipHeader.getName());
             return shl;
         } catch (InstantiationException ex) {

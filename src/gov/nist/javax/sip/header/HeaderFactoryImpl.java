@@ -294,12 +294,9 @@ public class HeaderFactoryImpl implements HeaderFactory , HeaderFactoryExt {
      * @param address - the new Address value of the address.
      * @return the newly created ContactHeader object.
      */
+    @Override
     public ContactHeader createContactHeader(Address address) {
-        if (address == null)
-            throw new NullPointerException("null arg address");
-        Contact contact = new Contact();
-        contact.setAddress(address);
-
+        io.pkts.packet.sip.header.ContactHeader contact = io.pkts.packet.sip.header.ContactHeader.with((io.pkts.packet.sip.address.Address)address).build();
         return contact;
     }
 

@@ -66,6 +66,12 @@ public class CSeq extends SIPHeader implements javax.sip.header.CSeqHeader {
     public CSeq() {
         super(CSEQ);
     }
+    
+    public CSeq(io.pkts.packet.sip.header.CSeqHeader header) {
+        super(CSEQ);
+        method =header.getMethod().toString();
+        seqno = header.getSeqNumber();
+    }    
 
     /**
      * Constructor given the sequence number and method.

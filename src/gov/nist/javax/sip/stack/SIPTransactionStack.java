@@ -55,6 +55,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import javax.sip.header.ViaHeader;
 
 /*
  * Jeff Keyser : architectural suggestions and contributions. Pierre De Rop and Thomas Froment :
@@ -625,7 +626,7 @@ public abstract class SIPTransactionStack implements
                 if ("TCP".equals(processor.getTransport())) {
                     NioTcpMessageChannel msgChannel =
                             (NioTcpMessageChannel) processor.createMessageChannel(dst, dstPort);
-                    return msgChannel.socketChannel.socket().getLocalSocketAddress();
+                    return msgChannel.socketChannel.getLocalAddress();
                 }
             }
             return null;
@@ -668,7 +669,7 @@ public abstract class SIPTransactionStack implements
             } else if(processor instanceof NioTlsMessageProcessor) {
                 NioTlsMessageChannel msgChannel =
                     (NioTlsMessageChannel) processor.createMessageChannel(dst, dstPort);
-                return msgChannel.socketChannel.socket().getLocalSocketAddress();
+                return msgChannel.socketChannel.getLocalAddress();
             }
         }
 
@@ -1183,7 +1184,7 @@ public abstract class SIPTransactionStack implements
         SIPTransaction retval = null;
         try {
             if (isServer) {
-                Via via = sipMessage.getTopmostVia();
+                ViaHeader via = sipMessage.getTopmostVia();
                 if (via.getBranch() != null) {
                     String key = sipMessage.getTransactionId();
 
@@ -1215,7 +1216,7 @@ public abstract class SIPTransactionStack implements
                 }
 
             } else {
-                Via via = sipMessage.getTopmostVia();
+                ViaHeader via = sipMessage.getTopmostVia();
                 if (via.getBranch() != null) {
                     String key = sipMessage.getTransactionId();
                     if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))

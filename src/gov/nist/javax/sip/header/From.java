@@ -59,6 +59,10 @@ public final class From
     public From() {
         super(NAME);
     }
+    
+    public From(io.pkts.packet.sip.header.FromHeader f) {
+        super(NAME);
+    }    
 
     /** Generate a FROM header from a TO header
      */

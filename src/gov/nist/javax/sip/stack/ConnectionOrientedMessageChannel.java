@@ -56,6 +56,7 @@ import java.util.concurrent.Semaphore;
 import javax.sip.ListeningPoint;
 import javax.sip.SipListener;
 import javax.sip.address.Hop;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Response;
 
 /**
@@ -217,7 +218,7 @@ public abstract class ConnectionOrientedMessageChannel extends MessageChannel im
         if(peerPortAdvertisedInHeaders <= 0) {
         	if(sipMessage instanceof SIPResponse) {
         		SIPResponse sipResponse = (SIPResponse) sipMessage; 
-        		Via via = sipResponse.getTopmostVia();
+        		ViaHeader via = sipResponse.getTopmostVia();
         		if(via.getRPort() > 0) {
 	            	if(via.getPort() <=0) {    
 	            		// if port is 0 we assume the default port for TCP
@@ -276,18 +277,6 @@ public abstract class ConnectionOrientedMessageChannel extends MessageChannel im
      */
     public void processMessage(SIPMessage sipMessage) throws Exception {
         try {
-        	if (sipMessage.getFrom() == null || sipMessage.getTo() == null
-                    || sipMessage.getCallId() == null
-                    || sipMessage.getCSeq() == null
-                    || sipMessage.getViaHeaders() == null) {
-                
-                if (logger.isLoggingEnabled()) {
-                    String badmsg = sipMessage.encode();
-                    logger.logError("bad message " + badmsg);
-                    logger.logError(">>> Dropped Bad Msg");
-                }
-                return;
-            }
         	
             sipMessage.setRemoteAddress(this.peerAddress);
             sipMessage.setRemotePort(this.getPeerPort());

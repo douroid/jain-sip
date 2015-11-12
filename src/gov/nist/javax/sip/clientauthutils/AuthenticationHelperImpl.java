@@ -170,7 +170,7 @@ public class AuthenticationHelperImpl implements AuthenticationHelper {
             	while (headerNames.hasNext()) {
             		String headerName = headerNames.next();
             		if ( reoriginatedRequest.getHeader(headerName) == null) {
-            			ListIterator<SIPHeader> iterator = challengedRequest.getHeaders(headerName);
+            			ListIterator<Header> iterator = challengedRequest.getHeaders(headerName);
             			while (iterator.hasNext()) { reoriginatedRequest.addHeader(iterator.next()); }
             		}
             	}
