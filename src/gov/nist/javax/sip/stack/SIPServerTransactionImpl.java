@@ -26,6 +26,7 @@
 package gov.nist.javax.sip.stack;
 
 import gov.nist.core.CommonLogger;
+import gov.nist.core.Host;
 import gov.nist.core.HostPort;
 import gov.nist.core.InternalErrorHandler;
 import gov.nist.core.LogWriter;
@@ -2050,7 +2051,9 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                 originalRequest.setInviteTransaction(null);
                 if(!getMethod().equalsIgnoreCase(Request.INVITE)) {
                     if(originalRequestSentBy == null) {
-                        originalRequestSentBy = ((Via)originalRequest.getTopmostVia()).getSentBy();
+                        originalRequestSentBy = new HostPort();
+                        originalRequestSentBy.setHost(new Host(originalRequest.getTopmostVia().getHost()));
+                        originalRequestSentBy.setPort(originalRequest.getTopmostVia().getPort());
                     }
                     if(originalRequestFromTag == null) {
                         originalRequestFromTag = originalRequest.getFromTag();

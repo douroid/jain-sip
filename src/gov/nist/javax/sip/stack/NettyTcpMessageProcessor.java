@@ -56,8 +56,8 @@ import java.net.InetSocketAddress;
  */
 public class NettyTcpMessageProcessor extends NettyConnectionOrientedMessageProcessor {
     private static StackLogger logger = CommonLogger.getLogger(NettyTcpMessageProcessor.class);
-    private final EventLoopGroup bossGroup = new NioEventLoopGroup();
-    private final EventLoopGroup workerGroup = new NioEventLoopGroup();
+    private final EventLoopGroup bossGroup = new EpollEventLoopGroup();
+    private final EventLoopGroup workerGroup = new EpollEventLoopGroup();
     final ServerBootstrap b = new ServerBootstrap(); // (3)
     private Channel bindChannel;
     protected NettyHandler nioHandler;    
@@ -92,10 +92,10 @@ public class NettyTcpMessageProcessor extends NettyConnectionOrientedMessageProc
     	super(ipAddress, port, "TCP", sipStack);
     	nioHandler = new NettyHandler(sipStack, this);
 
-        //b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
+        b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
         
         b.group(this.bossGroup, this.workerGroup)
-        .channel(NioServerSocketChannel.class)
+        .channel(EpollServerSocketChannel.class)
         .childHandler(new MyInit())
         .option(ChannelOption.SO_BACKLOG, 128)
         .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)

@@ -1,8 +1,7 @@
 package performance.uas;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Properties;
 
 import javax.sip.DialogTerminatedEvent;
@@ -173,7 +172,7 @@ public class ShootmeDialogStateless implements SipListener {
         sipFactory = SipFactory.getInstance();
         sipFactory.setPathName("gov.nist");
         Properties properties = new Properties();
-        properties.setProperty("javax.sip.STACK_NAME", "shootme");
+        /*properties.setProperty("javax.sip.STACK_NAME", "shootme");
         // You need 16 for logging traces. 32 for debug + traces.
         // Your code will limp at 32 but it is best for debugging.
         properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", "0");
@@ -192,11 +191,12 @@ public class ShootmeDialogStateless implements SipListener {
         properties.setProperty("gov.nist.javax.sip.THREAD_POOL_SIZE", "4");
         properties.setProperty("gov.nist.javax.sip.RECEIVE_UDP_BUFFER_SIZE", "65536");
         properties.setProperty("gov.nist.javax.sip.SEND_UDP_BUFFER_SIZE", "65536");
-        properties.setProperty("gov.nist.javax.sip.CONGESTION_CONTROL_ENABLED", "false");        
+        properties.setProperty("gov.nist.javax.sip.CONGESTION_CONTROL_ENABLED", "false");  */      
         try {
+            properties.load(new FileInputStream(new File("mss.properties")));
             // Create SipStack object
             sipStack = sipFactory.createSipStack(properties);
-        } catch (PeerUnavailableException e) {
+        } catch (Exception e) {
             // could not find
             // gov.nist.jain.protocol.ip.sip.SipStackImpl
             // in the classpath
@@ -211,8 +211,8 @@ public class ShootmeDialogStateless implements SipListener {
             headerFactory = sipFactory.createHeaderFactory();
             addressFactory = sipFactory.createAddressFactory();
             messageFactory = sipFactory.createMessageFactory();
-            ListeningPoint lp = sipStack.createListeningPoint("127.0.0.1",
-                    myPort, "udp");
+            ListeningPoint lp = sipStack.createListeningPoint("0.0.0.0",
+                    myPort, "tcp");
 
             ShootmeDialogStateless listener = this;
 

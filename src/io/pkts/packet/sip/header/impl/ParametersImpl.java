@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package io.pkts.packet.sip.header.impl;
 
@@ -13,16 +13,15 @@ import java.util.Iterator;
 
 import java.util.function.Supplier;
 
-
 /**
  * @author jonas@jonasborjesson.com
  */
-public abstract class ParametersImpl extends SipHeaderImpl implements Parameters,javax.sip.header.Parameters {
+public abstract class ParametersImpl extends SipHeaderImpl implements Parameters, javax.sip.header.Parameters {
 
     private final ParametersSupport support;
 
     /**
-     * 
+     *
      * @param name
      * @param params
      */
@@ -42,14 +41,14 @@ public abstract class ParametersImpl extends SipHeaderImpl implements Parameters
     }
 
     @Override
-    public void setParameter(final Buffer name, final Buffer value) throws SipParseException,
-    IllegalArgumentException {
+    public final void setParameter(final Buffer name, final Buffer value) throws SipParseException,
+            IllegalArgumentException {
         this.support.setParameter(name, value);
     }
 
     @Override
     public void setParameter(final Buffer name, final Supplier<Buffer> value) throws SipParseException,
-    IllegalArgumentException {
+            IllegalArgumentException {
         assertNotNull(value);
         this.support.setParameter(name, value.get());
     }
@@ -67,29 +66,38 @@ public abstract class ParametersImpl extends SipHeaderImpl implements Parameters
     protected void transferValue(final Buffer dst) {
         this.support.transferValue(dst);
     }
-    
 
     @Override
-    public String getParameter(String name)
-    {
-        return getParameterIO(name).toString();
+    public final String getParameter(String name) {
+        try {
+            Buffer paramValue = getParameterIO(Buffers.wrap(name));
+            if (paramValue != null) {
+                return paramValue.toString();
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
-
 
     @Override
-    public void setParameter(String name, String value) throws ParseException
-    {
-        setParameter(Buffers.wrap(name), Buffers.wrap(value));
+    public final void setParameter(String name, String value) throws ParseException {
+        try {
+            setParameter(Buffers.wrap(name), Buffers.wrap(value));
+        } catch (Exception e ) {
+            throw new ParseException(name, -1);
+        }
     }
 
-
-    public Iterator getParameterNames() {
+    @Override
+    public final Iterator getParameterNames() {
         throw new UnsupportedOperationException();
     }
 
-
-    public void removeParameter(String name) {
-        throw new UnsupportedOperationException();        
-    } 
+    @Override
+    public final void removeParameter(String name) {
+        throw new UnsupportedOperationException();
+    }
 
 }

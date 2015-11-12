@@ -9,7 +9,6 @@ import io.pkts.packet.sip.SipParseException;
 import io.pkts.packet.sip.address.Address;
 import io.pkts.packet.sip.header.FromHeader;
 import java.text.ParseException;
-import java.util.Iterator;
 
 
 /**
@@ -52,7 +51,7 @@ public class FromHeaderImpl extends AddressParametersHeaderImpl implements FromH
 
     @Override
     public void setTag(String tag) throws ParseException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        setParameter(TAG, Buffers.wrap(tag));
     }
 
     @Override

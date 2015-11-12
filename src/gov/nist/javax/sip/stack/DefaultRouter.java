@@ -163,7 +163,7 @@ public class DefaultRouter implements Router {
 
         SIPRequest sipRequest = (SIPRequest) request;
 
-        RequestLine requestLine = sipRequest.getRequestLine();
+        SipRequestLine requestLine = sipRequest.getRequestLine();
         if (requestLine == null) {
             return defaultRoute;
         }

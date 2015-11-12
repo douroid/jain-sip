@@ -31,9 +31,6 @@ package gov.nist.javax.sip.header;
 import javax.sip.address.URI;
 
 import gov.nist.javax.sip.address.*;
-import io.pkts.buffer.Buffer;
-import io.pkts.buffer.Buffers;
-import io.pkts.packet.sip.address.impl.SipURIImpl;
 
 /**
  * RequestLine of SIP Request.

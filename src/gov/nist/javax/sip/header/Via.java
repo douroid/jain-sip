@@ -38,6 +38,7 @@ import javax.sip.InvalidArgumentException;
 import javax.sip.address.Hop;
 import javax.sip.header.ViaHeader;
 import java.text.ParseException;
+import static javax.sip.header.ViaHeader.NAME;
 
 /**
  * Via SIPHeader (these are strung together in a ViaList).
@@ -87,8 +88,6 @@ public class Via
     /** sentBy field.
      */
     protected HostPort sentBy;
-    
-    private io.pkts.packet.sip.header.ViaHeader hdr;
 
     /**
      * comment field
@@ -104,26 +103,6 @@ public class Via
         super(NAME);
         sentProtocol = new Protocol();
     }
-    
-    /** Default constructor
-    */
-    public Via(io.pkts.packet.sip.header.ViaHeader header) {
-        super(NAME);
-        sentProtocol = new Protocol();
-        hdr = header;
-        sentBy = new HostPort();
-        sentBy.setHost(new Host(hdr.getHostIO().toString()));
-        sentBy.setPort(hdr.getPort());
-        if (hdr.getRPort() >= 0) { 
-            parameters.put(RPORT, new NameValue(RPORT, hdr.getRPort(), false));
-        }
-        if (hdr.getReceivedIO() != null){
-            parameters.put(RECEIVED, new NameValue(RECEIVED, hdr.getReceivedIO().toString(), false));        
-        }
-        if (hdr.getBranchIO() != null){
-            parameters.put(BRANCH, new NameValue(BRANCH, hdr.getBranchIO().toString(), false));        
-        }        
-    }    
 
     public boolean equals(Object other) {
 
@@ -178,7 +157,7 @@ public class Via
                 sentBy.getPort(),sentProtocol.getTransport());
         return hop;
     }
-    
+
     /**
      * Accessor for the parameters field
      * @return parameters field

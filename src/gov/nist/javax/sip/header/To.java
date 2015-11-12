@@ -30,6 +30,7 @@ package gov.nist.javax.sip.header;
 
 import gov.nist.core.HostPort;
 import gov.nist.javax.sip.address.AddressImpl;
+import static gov.nist.javax.sip.header.SIPHeaderNames.TO;
 import gov.nist.javax.sip.parser.Parser;
 
 import javax.sip.header.ToHeader;
@@ -61,10 +62,6 @@ public final class To extends AddressParametersHeader implements
     public To() {
         super(TO,true);
     }
-    
-    public To(io.pkts.packet.sip.header.ToHeader hdr) {
-        super(TO,true);
-    }    
 
     /**
      * Generate a TO header from a FROM header

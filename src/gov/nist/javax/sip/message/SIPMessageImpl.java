@@ -655,7 +655,7 @@ public abstract class SIPMessageImpl extends MessageObjectImpl implements SIPMes
      * @return -- the from header.
      */
     public FromHeader getFrom() {
-        return new From(msgImpl.getFromHeader());
+        return msgImpl.getFromHeader();
     }
 
     /**
@@ -1518,28 +1518,34 @@ public abstract class SIPMessageImpl extends MessageObjectImpl implements SIPMes
         }
     }
 
+    @Override
     public CallIdHeader getCallIdHeader() {
         return msgImpl.getCallIDHeader();
     }
 
+    @Override
     public FromHeader getFromHeader() {
-        return new From(msgImpl.getFromHeader());
+        return msgImpl.getFromHeader();
     }
 
+    @Override
     public ToHeader getToHeader() {
         return msgImpl.getToHeader();
     }
 
+    @Override
     public ViaHeader getTopmostViaHeader() {
         return msgImpl.getViaHeader();
     }
 
+    @Override
     public CSeqHeader getCSeqHeader() {
         return msgImpl.getCSeqHeader();
     }
 
     /**
      * Returns the charset to use for encoding/decoding the body of this message
+     * @return 
      */
     protected final String getCharset() {
         ContentType ct = getContentTypeHeader();

@@ -40,6 +40,7 @@ import gov.nist.javax.sip.address.AddressImpl;
 import javax.sip.InvalidArgumentException;
 import javax.sip.header.ContactHeader;
 import java.text.ParseException;
+import static javax.sip.header.ContactHeader.NAME;
 
 /**
  * Contact Item.
@@ -77,12 +78,6 @@ public final  class Contact
     public Contact() {
         super(NAME);
     }
-    
-    /** Default constructor.
-     */
-    public Contact(io.pkts.packet.sip.header.ContactHeader hdr) {
-        super(NAME);
-    }    
 
     /** Set a parameter.
     */

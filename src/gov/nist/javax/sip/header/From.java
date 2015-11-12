@@ -34,6 +34,7 @@ import gov.nist.javax.sip.parser.Parser;
 
 import javax.sip.header.FromHeader;
 import java.text.ParseException;
+import static javax.sip.header.FromHeader.NAME;
 
 /**
  * From SIP Header.
@@ -59,10 +60,6 @@ public final class From
     public From() {
         super(NAME);
     }
-    
-    public From(io.pkts.packet.sip.header.FromHeader f) {
-        super(NAME);
-    }    
 
     /** Generate a FROM header from a TO header
      */

@@ -126,7 +126,7 @@ public interface SIPRequest extends SIPMessage, javax.sip.message.Request, Reque
      *
      * @return the request line of the SIP Request.
      */
-    public RequestLine getRequestLine();
+    public gov.nist.javax.sip.header.SipRequestLine getRequestLine();
 
     /**
      * Set the request line of the SIP Request.

@@ -1,6 +1,8 @@
 package performance.uas;
 
 import gov.nist.javax.sip.message.RequestExt;
+import java.io.File;
+import java.io.FileInputStream;
 
 import java.util.Properties;
 import java.util.Timer;
@@ -35,7 +37,6 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 
-import test.unit.gov.nist.javax.sip.stack.tls.TlsTest;
 
 /**
  * This is the UAS application for performance testing
@@ -204,21 +205,22 @@ public class Shootme implements SipListener {
     public void init() {        
         sipStack = null;
         sipFactory = SipFactory.getInstance();
-        System.setProperty( "javax.net.ssl.keyStore",  "/Users/vladimirralev/keystore.ImportKey" );
+        /*System.setProperty( "javax.net.ssl.keyStore",  "/Users/vladimirralev/keystore.ImportKey" );
         System.setProperty( "javax.net.ssl.trustStore", "/Users/vladimirralev/keystore.ImportKey" );
         System.setProperty( "javax.net.ssl.keyStorePassword", "importkey" );
-        System.setProperty( "javax.net.ssl.keyStoreType", "jks" );
+        System.setProperty( "javax.net.ssl.keyStoreType", "jks" );*/
         sipFactory.setPathName("gov.nist");
         Properties properties = new Properties();
+
         properties.setProperty("javax.sip.STACK_NAME", "shootme");
         // You need 16 for logging traces. 32 for debug + traces.
         // Your code will limp at 32 but it is best for debugging.
-        properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", "LOG4J");
+        //properties.setProperty("gov.nist.javax.sip.TRACE_LEVEL", "LOG4J");
         Logger root = Logger.getRootLogger();
         root.setLevel(Level.WARN);
         root.addAppender(new ConsoleAppender(
             new PatternLayout(PatternLayout.TTCC_CONVERSION_PATTERN)));
-        properties.setProperty("gov.nist.javax.sip.LOG_MESSAGE_CONTENT", "false");
+        /*properties.setProperty("gov.nist.javax.sip.LOG_MESSAGE_CONTENT", "false");
         properties.setProperty("javax.sip.AUTOMATIC_DIALOG_SUPPORT", "off");        
         properties.setProperty("gov.nist.javax.sip.DEBUG_LOG",
                 "shootmedebug.txt");
@@ -234,14 +236,17 @@ public class Shootme implements SipListener {
         properties.setProperty("gov.nist.javax.sip.TCP_POST_PARSING_THREAD_POOL_SIZE", "12");
         properties.setProperty("gov.nist.javax.sip.CONGESTION_CONTROL_ENABLED", "false");
         properties.setProperty("gov.nist.javax.sip.TLS_CLIENT_AUTH_TYPE", "Disabled");
+        properties.setProperty("gov.nist.javax.sip.MESSAGE_PROCESSOR_FACTORY", "gov.nist.javax.sip.stack.NioMessageProcessorFactory");*/
+
         
 //      properties.setProperty("gov.nist.javax.sip.MESSAGE_PARSER_FACTORY", CharsMsgParserFactory.class.getName());
 //		properties.setProperty("gov.nist.javax.sip.TIMER_CLASS_NAME", ScheduledExecutorSipTimer.class.getName());
 //      properties.setProperty("gov.nist.javax.sip.TIMER_CLASS_NAME", HashWheelSipTimer.class.getName());
         try {
+            properties.load(new FileInputStream(new File("mss.properties")));
             // Create SipStack object
             sipStack = sipFactory.createSipStack(properties);
-        } catch (PeerUnavailableException e) {
+        } catch (Exception e) {
             // could not find
             // gov.nist.jain.protocol.ip.sip.SipStackImpl
             // in the classpath

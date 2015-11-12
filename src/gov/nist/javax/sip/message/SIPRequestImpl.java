@@ -201,7 +201,8 @@ public class SIPRequestImpl extends SIPMessageImpl implements SIPRequest, javax.
      *
      * @return the request line of the SIP Request.
      */
-    public RequestLine getRequestLine() {
+    @Override
+    public gov.nist.javax.sip.header.SipRequestLine getRequestLine() {
         SipInitialLine line = SipInitialLine.parse(request.getInitialLine());
         return new RequestLine((SipRequestLine) line);
     }

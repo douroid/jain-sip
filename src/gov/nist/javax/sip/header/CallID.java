@@ -29,6 +29,7 @@
 package gov.nist.javax.sip.header;
 import javax.sip.header.CallIdHeader;
 import java.text.ParseException;
+import static javax.sip.header.CallIdHeader.NAME;
 
 /**
  * Call ID SIPHeader.
@@ -56,10 +57,6 @@ public class CallID
     public CallID() {
         super(NAME);
     }
-    
-    public CallID(io.pkts.packet.sip.header.CallIdHeader hdr) {
-        super(NAME);
-    }    
 
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)

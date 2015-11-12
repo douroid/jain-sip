@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package io.pkts.packet.sip.header.impl;
 
@@ -26,7 +26,7 @@ import javax.sip.InvalidArgumentException;
  * Via-header we have already parsed the parameters. This because the Via-header
  * requires the branch parameter to be there and as such the framing of the
  * Via-header is done in a way that would complain if there are no params etc.
- * 
+ *
  * @author jonas@jonasborjesson.com
  */
 public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
@@ -83,7 +83,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
 
     /**
      * Constructor used mainly by the {@link HeaderFactoryImpl}
-     * 
+     *
      * @param transport
      * @param host
      * @param port
@@ -99,7 +99,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
         this.params = new ArrayList<Buffer[]>();
         if (branch != null) {
             this.indexOfBranch = 0;
-            this.params.add(new Buffer[] {BRANCH, branch});
+            this.params.add(new Buffer[]{BRANCH, branch});
         }
     }
 
@@ -126,10 +126,10 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
 
     @Override
     public void setParameter(final Buffer name, final Buffer value) throws SipParseException,
-    IllegalArgumentException {
+            IllegalArgumentException {
         final int index = findParameter(name);
         if (index == -1) {
-            this.params.add(new Buffer[] { name, value });
+            this.params.add(new Buffer[]{name, value});
         } else {
             this.params.get(index)[1] = value;
         }
@@ -137,7 +137,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
 
     @Override
     public void setParameter(final Buffer name, final Supplier<Buffer> value) throws SipParseException,
-    IllegalArgumentException {
+            IllegalArgumentException {
         assertNotNull(value);
         setParameter(name, value.get());
     }
@@ -204,7 +204,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
         }
         if (this.indexOfReceived == -1) {
             this.indexOfReceived = this.params.size();
-            this.params.add(new Buffer[] { RECEIVED, received });
+            this.params.add(new Buffer[]{RECEIVED, received});
         } else {
             this.params.get(this.indexOfReceived)[1] = received;
         }
@@ -251,7 +251,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
         }
         if (this.indexOfRPort == -1) {
             this.indexOfRPort = this.params.size();
-            this.params.add(new Buffer[] { RPORT, Buffers.wrap(port) });
+            this.params.add(new Buffer[]{RPORT, Buffers.wrap(port)});
         } else {
             this.params.get(this.indexOfRPort)[1] = Buffers.wrap(port);
         }
@@ -285,7 +285,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
         }
         if (this.indexOfBranch == -1) {
             this.indexOfBranch = this.params.size();
-            this.params.add(new Buffer[] {BRANCH, branch});
+            this.params.add(new Buffer[]{BRANCH, branch});
         } else {
             this.params.get(this.indexOfBranch)[1] = branch;
         }
@@ -313,7 +313,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
 
     /**
      * For a Via-header make sure that the branch parameter is present.
-     * 
+     *
      * {@inheritDoc}
      */
     @Override
@@ -438,7 +438,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
 
     @Override
     public void setReceived(String received) throws ParseException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        setReceived(Buffers.wrap(received));
     }
 
     @Override
@@ -448,7 +448,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
 
     @Override
     public void setBranch(String branch) throws ParseException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.setBranch(Buffers.wrap(branch));
     }
 
     @Override
@@ -458,12 +458,16 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
 
     @Override
     public String getParameter(String name) {
-        return getParameterIO(name).toString();
+        if (getParameterIO(name) != null) {
+            return getParameterIO(name).toString();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void setParameter(String name, String value) throws ParseException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        setParameter(Buffers.wrap(name), Buffers.wrap(value));
     }
 
     @Override
