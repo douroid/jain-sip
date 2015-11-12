@@ -39,6 +39,7 @@ import java.util.List;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.sip.Dialog;
 import javax.sip.TransactionState;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
@@ -244,7 +245,7 @@ public interface SIPTransaction extends TransactionExt {
    * underlying message channel, and adds a branch parameter to it for this
    * transaction.
    */
-  public Via getViaHeader();
+  public ViaHeader getViaHeader();
 
   /**
    * Process the message through the transaction and sends it to the SIP peer.

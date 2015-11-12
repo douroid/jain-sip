@@ -357,7 +357,7 @@ public abstract class MessageChannel extends SimpleChannelInboundHandler<SipMess
      *
      * @return a via header for outgoing messages sent from this channel.
      */
-    public Via getViaHeader() {
+    public ViaHeader getViaHeader() {
         Via channelViaHeader;
 
         channelViaHeader = new Via();

@@ -30,7 +30,6 @@
  */
 package gov.nist.javax.sip;
 
-import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.message.SIPResponse;
 
 import java.security.MessageDigest;

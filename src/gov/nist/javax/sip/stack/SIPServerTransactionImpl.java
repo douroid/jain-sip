@@ -562,7 +562,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
         if (isInviteTransaction() || !isTerminated()) {
 
             // Get the topmost Via header and its branch parameter
-            final Via topViaHeader = (Via) messageToTest.getTopmostVia();
+            final ViaHeader topViaHeader = messageToTest.getTopmostVia();
             if (topViaHeader != null) {
 
 //                topViaHeader = (Via) viaHeaders.getFirst();
@@ -592,21 +592,32 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                         // that it is trying to cancel.
                         transactionMatches = this.getMethod().equals(Request.CANCEL)
                                 && getBranch().equalsIgnoreCase(messageBranch)
-                                && topViaHeader.getSentBy().equals(
-                                         ((Via)origRequest.getTopmostVia()
-                                                 ).getSentBy());
+                                && topViaHeader.getHost().equals(
+                                         origRequest.getTopmostVia()
+                                                 .getHost())
+                                && topViaHeader.getPort() ==
+                                         origRequest.getTopmostVia()
+                                                 .getPort();
 
                     } else {
                         // Matching server side transaction with only the
                         // branch parameter.
                         if(origRequest != null) {
                             transactionMatches = getBranch().equalsIgnoreCase(messageBranch)
-                                && topViaHeader.getSentBy().equals(
-                                          ((Via)origRequest.getTopmostVia()
-                                                  ).getSentBy());
+                                && topViaHeader.getHost().equals(
+                                         origRequest.getTopmostVia()
+                                                 .getHost())
+                                && topViaHeader.getPort() ==
+                                         origRequest.getTopmostVia()
+                                                 .getPort();
                         } else {
                             transactionMatches = getBranch().equalsIgnoreCase(messageBranch)
-                                && topViaHeader.getSentBy().equals(originalRequestSentBy);
+                                && topViaHeader.getHost().equals(
+                                         origRequest.getTopmostVia()
+                                                 .getHost())
+                                && topViaHeader.getPort() ==
+                                         origRequest.getTopmostVia()
+                                                 .getPort();
                         }
 
                     }

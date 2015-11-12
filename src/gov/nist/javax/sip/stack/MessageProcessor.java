@@ -39,6 +39,7 @@ import java.net.InetAddress;
 import java.text.ParseException;
 
 import javax.sip.InvalidArgumentException;
+import javax.sip.header.ViaHeader;
 
 /**
  * This is the Stack abstraction for the active object that waits for messages
@@ -165,7 +166,7 @@ public abstract class MessageProcessor  {
      *
      * @return the ViaHeader to be used by the messages sent via this message processor.
      */
-    public Via getViaHeader() {
+    public ViaHeader getViaHeader() {
         try {
             Via via = new Via();
             if (this.sentByHostPort != null) {

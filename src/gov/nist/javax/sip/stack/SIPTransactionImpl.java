@@ -383,7 +383,7 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
         this.originalRequestCSeqNumber = newOriginalRequest.getCSeq().getSeqNumber();
         final ViaHeader topmostVia = newOriginalRequest.getTopmostVia();
         this.originalRequestBranch = topmostVia.getBranch();
-        this.originalRequestHasPort = ((Via)topmostVia).hasPort();
+        this.originalRequestHasPort = topmostVia.getPort() > 0 ;
         int originalRequestViaPort = topmostVia.getPort();
        
         if ( originalRequestViaPort == -1 ) {
@@ -773,9 +773,9 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
      * @see gov.nist.javax.sip.stack.SIPTransaction#getViaHeader()
      */
     @Override
-    public Via getViaHeader() {
+    public ViaHeader getViaHeader() {
         // Via header of the encapulated channel
-        Via channelViaHeader;
+        ViaHeader channelViaHeader;
 
         // Add the branch parameter to the underlying
         // channel's Via header
@@ -1100,8 +1100,10 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
                 // If the branch equals the branch in
                 // this message,
                 if (getBranch().equalsIgnoreCase(messageBranch)
-                        && ((Via)topViaHeader).getSentBy().equals(
-                                ((Via)origRequest.getTopmostVia()).getSentBy())) {
+                        && topViaHeader.getHost().equals(
+                                origRequest.getTopmostVia().getHost())
+                        && topViaHeader.getPort() ==
+                                origRequest.getTopmostVia().getPort()) {
                     transactionMatches = true;
                     if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
                         logger.logDebug("returning  true");

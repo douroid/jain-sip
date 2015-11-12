@@ -214,7 +214,7 @@ public abstract class SIPHeaderList<HDR extends Header> extends SIPHeader implem
      *
      * @return SIPHeader first element of the list.
      */
-    public Header getFirst() {
+    public HDR getFirst() {
         if (hlist == null || hlist.isEmpty())
             return null;
         else
@@ -226,7 +226,7 @@ public abstract class SIPHeaderList<HDR extends Header> extends SIPHeader implem
      *
      * @return SIPHeader last element of the list.
      */
-    public Header getLast() {
+    public HDR getLast() {
         if (hlist == null || hlist.isEmpty())
             return null;
         return  hlist.get(hlist.size() - 1);

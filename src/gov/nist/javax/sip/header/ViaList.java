@@ -44,7 +44,7 @@ import java.util.List;
  *
  *
  */
-public final class ViaList extends SIPHeaderList<Via> {
+public final class ViaList extends SIPHeaderList<ViaHeader> {
 
     private static final long serialVersionUID = 3899679374556152313L;
 
@@ -56,11 +56,11 @@ public final class ViaList extends SIPHeaderList<Via> {
      * Default Constructor.
      */
     public ViaList() {
-        super(Via.class, ViaHeader.NAME);
+        super(ViaHeader.class, ViaHeader.NAME);
     }
     
     public ViaList(List<SipHeader> list) {
-        super(Via.class, ViaHeader.NAME);
+        super(ViaHeader.class, ViaHeader.NAME);
     }
 
 

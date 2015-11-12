@@ -32,7 +32,6 @@ import gov.nist.core.net.NetworkLayer;
 import gov.nist.core.net.SecurityManagerProvider;
 import gov.nist.javax.sip.*;
 import gov.nist.javax.sip.header.Event;
-import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.header.extensions.JoinHeader;
 import gov.nist.javax.sip.header.extensions.ReplacesHeader;
 import gov.nist.javax.sip.message.SIPMessage;

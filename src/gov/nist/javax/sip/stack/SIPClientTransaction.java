@@ -13,6 +13,7 @@ import javax.sip.ObjectInUseException;
 import javax.sip.SipException;
 import javax.sip.address.Hop;
 import javax.sip.header.ContactHeader;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 
 public interface SIPClientTransaction extends ClientTransactionExt, SIPTransaction, ServerResponseInterface {
@@ -100,7 +101,7 @@ public interface SIPClientTransaction extends ClientTransactionExt, SIPTransacti
   /**
    * get the via header for an outgoing request.
    */
-  public abstract Via getOutgoingViaHeader();
+  public abstract ViaHeader getOutgoingViaHeader();
 
   /**
    * This is called by the stack after a non-invite client transaction goes to completed state.

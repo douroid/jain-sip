@@ -39,7 +39,7 @@ import java.util.ListIterator;
  * @version 1.2 $Revision: 1.7 $ $Date: 2009-07-17 18:57:28 $
  * @since 1.1
  */
-public class ContactList extends SIPHeaderList<Contact>  {
+public class ContactList extends SIPHeaderList<ContactHeader>  {
 
     private static final long serialVersionUID = 1224806837758986814L;
 
@@ -52,7 +52,7 @@ public class ContactList extends SIPHeaderList<Contact>  {
      * Constructor.
      */
     public ContactList() {
-        super(Contact.class, ContactHeader.NAME);
+        super(ContactHeader.class, ContactHeader.NAME);
 
     }
 

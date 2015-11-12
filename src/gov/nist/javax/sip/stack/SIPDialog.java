@@ -122,6 +122,7 @@ import javax.sip.header.RouteHeader;
 import javax.sip.header.SupportedHeader;
 import javax.sip.header.TimeStampHeader;
 import javax.sip.header.ToHeader;
+import javax.sip.header.ViaHeader;
 import javax.sip.message.Request;
 import javax.sip.message.Response;
 
@@ -1109,7 +1110,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
                     if (contactList != null
                             && SIPRequest.isTargetRefresh(sipResponse.getCSeq()
                                     .getMethod())) {
-                        this.setRemoteTarget((ContactHeader) contactList
+                        this.setRemoteTarget(contactList
                                 .getFirst());
                     }
                 }
@@ -1141,7 +1142,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
                 ContactList contactList = sipResponse.getContactHeaders();
                 if (contactList != null) {
                     this
-                            .setRemoteTarget((ContactHeader) contactList
+                            .setRemoteTarget(contactList
                                     .getFirst());
                 }
             }
@@ -1709,7 +1710,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
         // the route set. JvB: some duplication here, ref. doTargetRefresh
         ContactList contactList = sipRequest.getContactHeaders();
         if (contactList != null) {
-            this.setRemoteTarget((ContactHeader) contactList.getFirst());
+            this.setRemoteTarget(contactList.getFirst());
         }
 
         // Fix for issue #225: mustn't learn Route set from mid-dialog requests
@@ -2404,7 +2405,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
             throw new SipException("Cannot find listening point for transport "
                     + topMostViaTransport);
         }
-        Via via = lp.getViaHeader();
+        ViaHeader via = lp.getViaHeader();
 
         From from = new From();
         from.setAddress(this.getLocalParty());
@@ -2506,7 +2507,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
      * @param to -- the To header to assign to the request
      * @return -- the newly generated sip request.
      */
-    public Request createRequest(SipUri requestURI, Via via, CSeq cseq,
+    public Request createRequest(SipUri requestURI, ViaHeader via, CSeq cseq,
             From from, To to) {
         MessageFactoryImpl factory = new MessageFactoryImpl();
         String method = cseq.getMethod();
@@ -2536,7 +2537,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
      * @param method
      * @throws ParseException
      */
-    private final void setBranch(Via via, String method) {
+    private final void setBranch(ViaHeader via, String method) {
         String branch;
         if (method.equals(Request.ACK)) {
             if (getLastResponseStatusCode().intValue() >= 300) {
@@ -2618,7 +2619,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
         }
 
         if (dialogRequest.getTopmostVia() == null) {
-            Via via = ((SIPClientTransaction) clientTransaction)
+            ViaHeader via = ((SIPClientTransaction) clientTransaction)
                     .getOutgoingViaHeader();
             dialogRequest.addHeader(via);
         }
@@ -3695,7 +3696,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
          */
         if (contactList != null) {
 
-            Contact contact = (Contact) contactList.getFirst();
+            ContactHeader contact = contactList.getFirst();
             this.setRemoteTarget(contact);
 
         }

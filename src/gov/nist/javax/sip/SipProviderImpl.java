@@ -295,7 +295,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
           // last resort, instead of failing try to route anywhere
           lp = (ListeningPointImpl) this.getListeningPoints()[0];
         }
-        Via via = lp.getViaHeader();
+        ViaHeader via = lp.getViaHeader();
         sipRequest.setHeader(via);
       }
       // Give the request a quick check to see if all headers are assigned.

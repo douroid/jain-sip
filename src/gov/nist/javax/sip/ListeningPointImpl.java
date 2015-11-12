@@ -217,7 +217,7 @@ public class ListeningPointImpl implements javax.sip.ListeningPoint, gov.nist.ja
     public boolean isSentBySet() {
         return this.messageProcessor.isSentBySet();
     }
-    public Via getViaHeader() {
+    public ViaHeader getViaHeader() {
         return this.messageProcessor.getViaHeader();
      }
 

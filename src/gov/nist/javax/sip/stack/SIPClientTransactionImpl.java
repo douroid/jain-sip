@@ -404,7 +404,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
       transactionRequest = (SIPRequest) messageToSend;
 
       // Set the branch id for the top via header.
-      Via topVia = (Via) transactionRequest.getTopmostVia();
+      ViaHeader topVia = transactionRequest.getTopmostVia();
       // Tack on a branch identifier to match responses.
       try {
         topVia.setBranch(getBranch());
@@ -1259,7 +1259,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
       // location so we cannot use that to construct the
       // request URI.
       if (lastResponse.getContactHeaders() != null && lastResponse.getStatusCode() / 100 != 3) {
-        Contact contact = (Contact) lastResponse.getContactHeaders().getFirst();
+        ContactHeader contact = lastResponse.getContactHeaders().getFirst();
         javax.sip.address.URI uri = (javax.sip.address.URI) contact.getAddress().getURI().clone();
         ackRequest.setRequestURI(uri);
       }
@@ -1279,9 +1279,9 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
       routeList.add(route);
     }
 
-    Contact contact = null;
+    ContactHeader contact = null;
     if (lastResponse.getContactHeaders() != null) {
-      contact = (Contact) lastResponse.getContactHeaders().getFirst();
+      contact = lastResponse.getContactHeaders().getFirst();
     }
 
     if (!((SipURI) ((Route) routeList.getFirst()).getAddress().getURI()).hasLrParam()) {
@@ -1372,7 +1372,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
    * @see gov.nist.javax.sip.stack.SIPClientTransaction#getOutgoingViaHeader()
    */
   @Override
-  public Via getOutgoingViaHeader() {
+  public ViaHeader getOutgoingViaHeader() {
     return this.getMessageProcessor().getViaHeader();
   }
 
