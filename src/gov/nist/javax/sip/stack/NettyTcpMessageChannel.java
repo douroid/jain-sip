@@ -91,7 +91,7 @@ public class NettyTcpMessageChannel extends NettyConnectionOrientedMessageChanne
             this.peerAddress = socketChannel.remoteAddress().getAddress();
             this.peerPort = socketChannel.remoteAddress().getPort();
             this.socketChannel = socketChannel;
-            //super.mySock = socketChannel.;
+            super.mySock = socketChannel;
             this.peerProtocol = messageProcessor.transport;
             lastActivityTimeStamp = System.currentTimeMillis();
             super.key = MessageChannel.getKey(peerAddress, peerPort, messageProcessor.transport);
@@ -122,7 +122,7 @@ public class NettyTcpMessageChannel extends NettyConnectionOrientedMessageChanne
                     inetAddress, port);
             peerAddress = socketChannel.remoteAddress().getAddress();
             peerPort = socketChannel.remoteAddress().getPort();
-            //super.mySock = socketChannel.socket();
+            super.mySock = socketChannel;
             peerProtocol = getTransport();
             putMessageChannel(socketChannel, this);
             lastActivityTimeStamp = System.currentTimeMillis();

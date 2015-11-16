@@ -9,7 +9,6 @@ import io.pkts.packet.sip.SipParseException;
 import io.pkts.packet.sip.address.Address;
 import io.pkts.packet.sip.header.ToHeader;
 import java.text.ParseException;
-import java.util.Iterator;
 
 /**
  * @author jonas@jonasborjesson.com
@@ -55,7 +54,11 @@ public final class ToHeaderImpl extends AddressParametersHeaderImpl implements T
 
     @Override
     public String getTag() {
-        return getTagIO().toString();
+        if (getTagIO() != null) {
+            return getTagIO().toString();
+        } else {
+            return null;
+        }
     }
 
 }

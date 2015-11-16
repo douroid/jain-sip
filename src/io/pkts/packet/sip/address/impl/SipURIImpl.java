@@ -410,7 +410,7 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
 
     @Override
     public String getUser() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getUserIO().toString();
     }
 
     @Override
@@ -435,7 +435,7 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
 
     @Override
     public String getHost() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getHostIO().toString();
     }
 
     @Override
@@ -475,7 +475,7 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
 
     @Override
     public String getMethodParam() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getMethodParamIO().toString();
     }
 
     @Override
@@ -490,12 +490,12 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
 
     @Override
     public String getUserParam() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getUserParamIO().toString();
     }
 
     @Override
     public String getMAddrParam() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return getMAddrParamIO().toString();
     }
 
     @Override

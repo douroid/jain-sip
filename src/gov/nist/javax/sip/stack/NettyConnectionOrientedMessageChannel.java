@@ -48,6 +48,7 @@ import gov.nist.javax.sip.parser.Pipeline;
 import gov.nist.javax.sip.parser.PipelinedMsgParser;
 import gov.nist.javax.sip.parser.SIPMessageListener;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.socket.SocketChannel;
 import io.pkts.packet.sip.SipRequest;
 import io.pkts.packet.sip.SipResponse;
 import io.sipstack.netty.codec.sip.Connection;
@@ -77,7 +78,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
     private static StackLogger logger = CommonLogger.getLogger(NettyConnectionOrientedMessageChannel.class);
     protected SIPTransactionStack sipStack;
 
-    protected Socket mySock;
+    protected SocketChannel mySock;
 
     protected PipelinedMsgParser myParser;
 
@@ -332,7 +333,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
                 try {
                     if (mySock != null) { // selfrouting makes socket = null
                         // https://jain-sip.dev.java.net/issues/show_bug.cgi?id=297
-                        this.peerAddress = mySock.getInetAddress();
+                        this.peerAddress = mySock.remoteAddress().getAddress();
                     }
                     // Check to see if the received parameter matches
                     // the peer address and tag it appropriately.
@@ -363,15 +364,14 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
                     // mySock=null
                     // https://jain-sip.dev.java.net/issues/show_bug.cgi?id=297
                     this.isCached = true;
-                    int remotePort = ((java.net.InetSocketAddress) mySock
-                            .getRemoteSocketAddress()).getPort();
-                    String key = IOHandler.makeKey(mySock.getInetAddress(),
+                    int remotePort = mySock.remoteAddress().getPort();
+                    String key = NettyHandler.makeKey(mySock.remoteAddress().getAddress(),
                             remotePort);
-                    if (this.messageProcessor instanceof NioTcpMessageProcessor) {
+                    if (this.messageProcessor instanceof NettyTcpMessageProcessor) {
                         // https://java.net/jira/browse/JSIP-475 don't use iohandler in case of NIO communications of the socket will leak in the iohandler sockettable
-                        ((NioTcpMessageProcessor) this.messageProcessor).nioHandler.putSocket(key, mySock.getChannel());
+                        ((NettyTcpMessageProcessor) this.messageProcessor).nioHandler.putSocket(key, mySock);
                     } else {
-                        sipStack.ioHandler.putSocket(key, mySock);
+                        //sipStack.ioHandler.putSocket(key, mySock);
                     }
                     // since it can close the socket it needs to be after the mySock usage otherwise
                     // it the socket will be disconnected and NPE will be thrown in some edge cases
@@ -701,7 +701,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
     public void sendSingleCLRF() throws Exception {
         lastKeepAliveReceivedTime = System.currentTimeMillis();
 
-        if (mySock != null && !mySock.isClosed()) {
+        if (mySock != null && mySock.isOpen()) {
             sendMessage("\r\n".getBytes("UTF-8"), false);
         }
 
@@ -854,7 +854,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
         }
     }
 
-    Connection conn;
+    protected Connection conn;
 
     @Override
     public void channelRead0(ChannelHandlerContext chc, SipMessageEvent i) throws Exception {

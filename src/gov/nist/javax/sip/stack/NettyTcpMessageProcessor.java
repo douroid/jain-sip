@@ -29,6 +29,7 @@ import gov.nist.core.CommonLogger;
 import gov.nist.core.HostPort;
 import gov.nist.core.LogWriter;
 import gov.nist.core.StackLogger;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -38,8 +39,7 @@ import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
-import io.netty.channel.nio.NioEventLoopGroup; 
-import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.socket.SocketChannel;
 import io.sipstack.netty.codec.sip.SipMessageEncoder;
 import io.sipstack.netty.codec.sip.SipMessageStreamDecoder;
@@ -50,93 +50,102 @@ import java.net.InetSocketAddress;
 
 /**
  * Netty implementation for TCP.
- * 
+ *
  * @author mranga
  *
  */
 public class NettyTcpMessageProcessor extends NettyConnectionOrientedMessageProcessor {
+
     private static StackLogger logger = CommonLogger.getLogger(NettyTcpMessageProcessor.class);
     private final EventLoopGroup bossGroup = new EpollEventLoopGroup();
     private final EventLoopGroup workerGroup = new EpollEventLoopGroup();
     final ServerBootstrap b = new ServerBootstrap(); // (3)
+    final Bootstrap outboundBootstrap = new Bootstrap();
     private Channel bindChannel;
-    protected NettyHandler nioHandler;    
+    protected NettyHandler nioHandler;
 
     public SocketChannel blockingConnect(InetSocketAddress address, InetAddress localAddress) throws IOException {
-        //TODO 
-        return null;
-    }
-        
-    public void send(SocketChannel socket, byte[] data)  {
-
-    }
-    
-
-    
-    public NettyTcpMessageChannel createMessageChannel(NettyTcpMessageProcessor nioTcpMessageProcessor, SocketChannel client) throws IOException {
-    	return NettyTcpMessageChannel.create(NettyTcpMessageProcessor.this, client);
-    }
-    
-    class MyInit extends io.netty.channel.ChannelInitializer<SocketChannel> {
-            @Override
-            public void initChannel(final SocketChannel ch) throws Exception {
-                final ChannelPipeline pipeline = ch.pipeline();
-                pipeline.addLast("decoder", new SipMessageStreamDecoder());
-                pipeline.addLast("encoder", new SipMessageEncoder());
-                NettyTcpMessageChannel channel = NettyTcpMessageChannel.create(NettyTcpMessageProcessor.this, ch);
-                pipeline.addLast("handler", channel);
-            }
+        ChannelFuture future = outboundBootstrap.connect(address);
+        try {
+            return (SocketChannel) future.sync().channel();
+        } catch (InterruptedException ex) {
+            throw new IOException(ex);
         }
-    
-    public NettyTcpMessageProcessor(InetAddress ipAddress,  SIPTransactionStack sipStack, int port) {
-    	super(ipAddress, port, "TCP", sipStack);
-    	nioHandler = new NettyHandler(sipStack, this);
+    }
+
+    public void send(SocketChannel socket, byte[] data) {
+
+    }
+
+    public NettyTcpMessageChannel createMessageChannel(NettyTcpMessageProcessor nioTcpMessageProcessor, SocketChannel client) throws IOException {
+        return NettyTcpMessageChannel.create(NettyTcpMessageProcessor.this, client);
+    }
+
+    class MyInit extends io.netty.channel.ChannelInitializer<SocketChannel> {
+
+        @Override
+        public void initChannel(final SocketChannel ch) throws Exception {
+            final ChannelPipeline pipeline = ch.pipeline();
+            pipeline.addLast("decoder", new SipMessageStreamDecoder());
+            pipeline.addLast("encoder", new SipMessageEncoder());
+            NettyTcpMessageChannel channel = NettyTcpMessageChannel.create(NettyTcpMessageProcessor.this, ch);
+            pipeline.addLast("handler", channel);
+        }
+    }
+
+    public NettyTcpMessageProcessor(InetAddress ipAddress, SIPTransactionStack sipStack, int port) {
+        super(ipAddress, port, "TCP", sipStack);
+        nioHandler = new NettyHandler(sipStack, this);
 
         b.childOption(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT);
-        
+        b.childOption(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK, 32 * 1024);
+        b.childOption(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, 8 * 1024);
+
         b.group(this.bossGroup, this.workerGroup)
-        .channel(EpollServerSocketChannel.class)
-        .childHandler(new MyInit())
-        .option(ChannelOption.SO_BACKLOG, 128)
-        .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
-        .childOption(ChannelOption.SO_KEEPALIVE, true)
-        .childOption(ChannelOption.TCP_NODELAY, true);
+                .channel(EpollServerSocketChannel.class)
+                .childHandler(new MyInit())
+                .option(ChannelOption.SO_BACKLOG, 128)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10000)
+                .childOption(ChannelOption.SO_KEEPALIVE, true)
+                .childOption(ChannelOption.TCP_NODELAY, true);
 
+        outboundBootstrap.group(workerGroup)
+                .channel(EpollSocketChannel.class)
+                .handler(new MyInit())
+                .option(ChannelOption.SO_BACKLOG, 128);
 
-       
     }
 
     @Override
     public MessageChannel createMessageChannel(HostPort targetHostPort) throws IOException {
-    	if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
-    		logger.logDebug("NioTcpMessageProcessor::createMessageChannel: " + targetHostPort);
-    	}
-    	try {
-    		String key = MessageChannel.getKey(targetHostPort, transport);
-    		if (messageChannels.get(key) != null) {
-    			return this.messageChannels.get(key);
-    		} else {
-    			NettyTcpMessageChannel retval = new NettyTcpMessageChannel(targetHostPort.getInetAddress(),
-    					targetHostPort.getPort(), sipStack, this);
-    			
-    			
-    		//	retval.getSocketChannel().register(selector, SelectionKey.OP_READ);
-    			synchronized(messageChannels) {
-    				this.messageChannels.put(key, retval);
-    			}
-    			retval.isCached = true;
-    			if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
-    				logger.logDebug("key " + key);
-    				logger.logDebug("Creating " + retval);
-    			}
-    			return retval;
+        if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+            logger.logDebug("NioTcpMessageProcessor::createMessageChannel: " + targetHostPort);
+        }
+        try {
+            String key = MessageChannel.getKey(targetHostPort, transport);
+            if (messageChannels.get(key) != null) {
+                return this.messageChannels.get(key);
+            } else {
+                NettyTcpMessageChannel retval = new NettyTcpMessageChannel(targetHostPort.getInetAddress(),
+                        targetHostPort.getPort(), sipStack, this);
 
-    		}
-    	} finally {
-    		if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
-    			logger.logDebug("MessageChannel::createMessageChannel - exit");
-    		}
-    	}
+                //	retval.getSocketChannel().register(selector, SelectionKey.OP_READ);
+                synchronized (messageChannels) {
+                    this.messageChannels.put(key, retval);
+                }
+                retval.isCached = true;
+                if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+                    logger.logDebug("key " + key);
+                    logger.logDebug("Creating " + retval);
+                }
+                return retval;
+
+            }
+        } finally {
+            if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+                logger.logDebug("MessageChannel::createMessageChannel - exit");
+            }
+        }
     }
 
     @Override
@@ -146,8 +155,8 @@ public class NettyTcpMessageProcessor extends NettyConnectionOrientedMessageProc
             return this.messageChannels.get(key);
         } else {
             NettyTcpMessageChannel retval = new NettyTcpMessageChannel(targetHost, port, sipStack, this);
-            
- //           retval.getSocketChannel().register(selector, SelectionKey.OP_READ);
+
+            //           retval.getSocketChannel().register(selector, SelectionKey.OP_READ);
             this.messageChannels.put(key, retval);
             retval.isCached = true;
             if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
@@ -162,10 +171,10 @@ public class NettyTcpMessageProcessor extends NettyConnectionOrientedMessageProc
     // https://java.net/jira/browse/JSIP-475
     @Override
     protected synchronized void remove(
-    		NettyConnectionOrientedMessageChannel messageChannel) {
+            NettyConnectionOrientedMessageChannel messageChannel) {
 
     }
-    
+
     @Override
     public int getDefaultTargetPort() {
         return 5060;
@@ -176,20 +185,17 @@ public class NettyTcpMessageProcessor extends NettyConnectionOrientedMessageProc
         return false;
     }
 
-   
-
     @Override
     public void start() throws IOException {
         try {
             final InetSocketAddress socketAddress = new InetSocketAddress(this.getIpAddress(), this.getPort());
-            final ChannelFuture f = b.bind(socketAddress).sync();  
+            final ChannelFuture f = b.bind(socketAddress).sync();
             bindChannel = f.channel();
         } catch (InterruptedException ex) {
             throw new IOException(ex);
         }
 
     }
-    
 
     @Override
     public void stop() {

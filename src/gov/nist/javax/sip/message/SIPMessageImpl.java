@@ -35,9 +35,7 @@ import gov.nist.javax.sip.SIPConstants;
 import gov.nist.javax.sip.Utils;
 import gov.nist.javax.sip.header.AlertInfo;
 import gov.nist.javax.sip.header.Authorization;
-import gov.nist.javax.sip.header.CSeq;
 import gov.nist.javax.sip.header.CallID;
-import gov.nist.javax.sip.header.Contact;
 import gov.nist.javax.sip.header.ContactList;
 import gov.nist.javax.sip.header.ContentLength;
 import gov.nist.javax.sip.header.ContentType;
@@ -66,7 +64,6 @@ import gov.nist.javax.sip.header.Subject;
 import gov.nist.javax.sip.header.To;
 import gov.nist.javax.sip.header.Unsupported;
 import gov.nist.javax.sip.header.UserAgent;
-import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.header.ViaList;
 import gov.nist.javax.sip.header.WWWAuthenticate;
 import gov.nist.javax.sip.header.Warning;
@@ -1187,7 +1184,7 @@ public abstract class SIPMessageImpl extends MessageObjectImpl implements SIPMes
      * Return the to tag.
      */
     public String getToTag() {
-        return msgImpl.getToHeader() == null ? null : msgImpl.getToHeader().getTag().toString();
+        return msgImpl.getToHeader().getTag() == null ? null : msgImpl.getToHeader().getTag().toString();
     }
 
     /**

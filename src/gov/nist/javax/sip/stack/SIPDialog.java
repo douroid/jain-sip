@@ -36,6 +36,7 @@ import gov.nist.core.CommonLogger;
 import gov.nist.core.InternalErrorHandler;
 import gov.nist.core.LogLevels;
 import gov.nist.core.LogWriter;
+import gov.nist.core.NameValue;
 import gov.nist.core.NameValueList;
 import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.DialogExt;
@@ -181,7 +182,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
     // jeand replaced the last response with only the data from it needed to
     // save on mem
     protected String lastResponseDialogId;
-    private Via lastResponseTopMostVia;
+    private ViaHeader lastResponseTopMostVia;
     protected Integer lastResponseStatusCode;
     protected long lastResponseCSeqNumber;
     protected long lastInviteResponseCSeqNumber;
@@ -3154,7 +3155,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
             MessageFactoryImpl factory= new MessageFactoryImpl();
 
 
-            List<Via> vias = new ArrayList<Via>();
+            List<ViaHeader> vias = new ArrayList<ViaHeader>();
             // Via via = lp.getViaHeader();
             // The user may have touched the sentby for the response.
             // so use the via header extracted from the response for the ACK =>
@@ -3162,19 +3163,22 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
             // strip the params from the via of the response and use the params
             // from the
             // original request
-            Via via = this.lastResponseTopMostVia;
+            ViaHeader via = this.lastResponseTopMostVia;
             if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
                 logger.logDebug("lastResponseTopMostVia " + lastResponseTopMostVia);
             }
-            via.removeParameters();
+            //TODOvia.removeParameters();
             if (originalRequest != null
                     && originalRequest.getTopmostVia() != null) {
                 NameValueList originalRequestParameters = ((Via)originalRequest
                         .getTopmostVia()).getParameters();
                 if (originalRequestParameters != null
                         && originalRequestParameters.size() > 0) {
-                    via.setParameters((NameValueList) originalRequestParameters
-                            .clone());
+                    NameValueList list = (NameValueList) originalRequestParameters
+                            .clone();
+                    for (NameValue nValue : list.values()){
+                        via.setParameter(nValue.getName(), nValue.getValue());
+                    }
                 }
             }
             via.setBranch(Utils.getInstance().generateBranchId()); // new branch
@@ -3297,7 +3301,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
             this.lastResponseStatusCode = Integer.valueOf(statusCode);
             // Issue 378 : http://java.net/jira/browse/JSIP-378
             // Cloning the via header to avoid race condition and be modified
-            this.lastResponseTopMostVia = (Via) sipResponse.getTopmostVia().clone();
+            this.lastResponseTopMostVia = (ViaHeader) sipResponse.getTopmostVia().clone();
             String cseqMethod = sipResponse.getCSeqHeader().getMethod();
             this.lastResponseMethod = cseqMethod;
             long responseCSeqNumber = sipResponse.getCSeq().getSeqNumber();
@@ -4367,7 +4371,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
     /**
      * @return the lastResponseTopMostVia
      */
-    public Via getLastResponseTopMostVia() {
+    public ViaHeader getLastResponseTopMostVia() {
         return lastResponseTopMostVia;
     }
 
