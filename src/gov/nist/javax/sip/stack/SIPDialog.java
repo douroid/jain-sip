@@ -67,7 +67,7 @@ import gov.nist.javax.sip.header.TimeStamp;
 import gov.nist.javax.sip.header.To;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.message.MessageFactoryImpl;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.parser.AddressParser;
@@ -972,7 +972,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
      * @param sipMessage -- SIP Message to extract the relevant information
      * from.
      */
-    protected void setRemoteParty(SIPMessage sipMessage) {
+    protected void setRemoteParty(SIPMessageInt sipMessage) {
 
         if (!isServer()) {
 
@@ -2225,7 +2225,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
         return this.localParty;
     }
 
-    protected void setLocalParty(SIPMessage sipMessage) {
+    protected void setLocalParty(SIPMessageInt sipMessage) {
         if (!isServer()) {
             this.localParty = sipMessage.getFromHeader().getAddress();
         } else {
@@ -2372,12 +2372,16 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
                     + " not yet established or terminated " + this.getState());
         }
 
-        SipUri sipUri = null;
+        SipURI sipUri = null;
         if (this.getRemoteTarget() != null) {
-            sipUri = (SipUri) this.getRemoteTarget().getURI().clone();
+            sipUri = (SipURI) this.getRemoteTarget().getURI().clone();
         } else {
-            sipUri = (SipUri) this.getRemoteParty().getURI().clone();
-            sipUri.clearUriParms();
+            sipUri = (SipURI) this.getRemoteParty().getURI().clone();
+            Iterator<String> parameterNames = sipUri.getParameterNames();
+            while(parameterNames.hasNext())
+            {
+                sipUri.removeParameter(parameterNames.next());
+            }
         }
 
         CSeq cseq = new CSeq();
@@ -2508,7 +2512,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
      * @param to -- the To header to assign to the request
      * @return -- the newly generated sip request.
      */
-    public Request createRequest(SipUri requestURI, ViaHeader via, CSeq cseq,
+    public Request createRequest(SipURI requestURI, ViaHeader via, CSeq cseq,
             From from, To to) {
         MessageFactoryImpl factory = new MessageFactoryImpl();
         String method = cseq.getMethod();
@@ -3689,7 +3693,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
      * 14). Other extensions may define different target refresh requests for
      * dialogs established in other ways.
      */
-    private void doTargetRefresh(SIPMessage sipMessage) {
+    private void doTargetRefresh(SIPMessageInt sipMessage) {
 
         ContactList contactList = sipMessage.getContactHeaders();
 

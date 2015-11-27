@@ -38,10 +38,10 @@ import java.util.NoSuchElementException;
 public class HeaderIterator implements ListIterator {
     private boolean toRemove;
     private int index;
-    private SIPMessage sipMessage;
+    private SIPMessageInt sipMessage;
     private SIPHeader sipHeader;
 
-    protected HeaderIterator(SIPMessage sipMessage, SIPHeader sipHeader) {
+    protected HeaderIterator(SIPMessageInt sipMessage, SIPHeader sipHeader) {
         this.sipMessage = sipMessage;
         this.sipHeader = sipHeader;
     }

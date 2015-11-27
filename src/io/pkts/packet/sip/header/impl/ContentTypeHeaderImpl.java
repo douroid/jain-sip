@@ -26,7 +26,7 @@ public final class ContentTypeHeaderImpl extends MediaTypeHeaderImpl implements 
 
     @Override
     public ContentTypeHeader clone() {
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         transferValue(buffer);
         try {
             return ContentTypeHeader.frame(buffer);

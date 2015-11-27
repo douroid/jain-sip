@@ -2,7 +2,7 @@ package test.unit.gov.nist.javax.sip.stack;
 
 import gov.nist.javax.sip.DialogExt;
 import gov.nist.javax.sip.SipProviderExt;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.stack.MessageChannel;
 import gov.nist.javax.sip.stack.NioMessageProcessorFactory;

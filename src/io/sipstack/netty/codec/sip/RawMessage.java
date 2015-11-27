@@ -71,7 +71,7 @@ public final class RawMessage {
     /**
      * Used for detecting the content-length header
      */
-    private final Buffer contentLengthBuffer = Buffers.wrap("Content-Length");
+    private static final Buffer contentLengthBuffer = Buffers.wrap("Content-Length");
     int contentLengthIndex = 1; // because we will trigger on 'C'
 
     public enum State {

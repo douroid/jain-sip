@@ -77,7 +77,7 @@ public final class SipRequestLine extends SipInitialLine {
      */
     @Override
     public Buffer getBuffer() {
-        final Buffer tmp = Buffers.createBuffer(1024);
+        final Buffer tmp = Buffers.createBuffer(256);
         getBytes(tmp);
         return tmp;
     }

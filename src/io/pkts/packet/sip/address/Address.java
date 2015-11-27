@@ -16,7 +16,7 @@ import io.pkts.packet.sip.address.impl.AddressImpl;
  * @author jonas@jonasborjesson.com
  */
 public interface Address extends javax.sip.address.Address{
-
+    static final int DEFAULT_BUFFER_SIZE = 256;
     /**
      * Get the display name of this {@link Address} or an empty buffer if it is
      * not set.

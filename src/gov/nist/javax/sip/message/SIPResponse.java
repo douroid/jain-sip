@@ -42,7 +42,7 @@ import java.text.ParseException;
  *
  *
  */
-public interface SIPResponse extends SIPMessage, javax.sip.message.Response, ResponseExt {
+public interface SIPResponse extends SIPMessageInt, javax.sip.message.Response, ResponseExt {
 
    
     public static String getReasonPhrase(int rc) {

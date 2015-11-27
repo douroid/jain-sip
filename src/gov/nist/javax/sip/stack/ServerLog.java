@@ -35,7 +35,7 @@ import gov.nist.core.ServerLogger;
 import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.LogRecord;
 import gov.nist.javax.sip.header.CallID;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -312,7 +312,7 @@ public class ServerLog implements ServerLogger {
      * @param sender is the server the sender
      * @param time is the time to associate with the message.
      */
-    public void logMessage(SIPMessage message, String from, String to, boolean sender, long time) {
+    public void logMessage(SIPMessageInt message, String from, String to, boolean sender, long time) {
         checkLogFile();
         if (message.getFirstLine() == null)
             return;
@@ -338,7 +338,7 @@ public class ServerLog implements ServerLogger {
      * @param sender is the server the sender or receiver (true if sender).
      * @param time is the reception time.
      */
-    public void logMessage(SIPMessage message, String from, String to, String status,
+    public void logMessage(SIPMessageInt message, String from, String to, String status,
             boolean sender, long time) {
         checkLogFile();
         CallID cid = (CallID) message.getCallId();
@@ -363,7 +363,7 @@ public class ServerLog implements ServerLogger {
      * @param status the status to log.
      * @param sender is the server the sender or receiver (true if sender).
      */
-    public void logMessage(SIPMessage message, String from, String to, String status,
+    public void logMessage(SIPMessageInt message, String from, String to, String status,
             boolean sender) {
         logMessage(message, from, to, status, sender, System.currentTimeMillis());
     }

@@ -57,6 +57,7 @@ import static io.pkts.packet.sip.impl.PreConditions.assertNotEmpty;
  */
 public interface SipHeader extends Cloneable, javax.sip.header.Header {
 
+    static final int DEFAULT_BUFFER_SIZE = 256;
     /**
      * Get the name of the header
      * 

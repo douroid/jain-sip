@@ -32,7 +32,7 @@ import gov.nist.core.CommonLogger;
 import gov.nist.core.LogLevels;
 import gov.nist.core.LogWriter;
 import gov.nist.core.StackLogger;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.stack.ConnectionOrientedMessageChannel;
 import gov.nist.javax.sip.stack.QueuedMessageDispatchBase;
 import gov.nist.javax.sip.stack.SIPTransactionStack;
@@ -158,7 +158,7 @@ public class NioPipelineParser {
             }
             
             UnparsedMessage unparsedMessage = null;
-            SIPMessage parsedSIPMessage = null;
+            SIPMessageInt parsedSIPMessage = null;
             boolean messagePolled = false;
             try {
             	synchronized(smp) {
@@ -376,7 +376,7 @@ public class NioPipelineParser {
                 
                 PostParseExecutorServices.getPostParseExecutor().execute(new Dispatch(callIDOrderingStructure, callId)); // run in executor thread
 			} else {
-				SIPMessage sipMessage = null;
+				SIPMessageInt sipMessage = null;
 				synchronized(smp) {
 					try {
 						sipMessage = smp.parseSIPMessage(msgLines.getBytes(), false, false, null);
@@ -392,7 +392,7 @@ public class NioPipelineParser {
 
 	}
 
-	public void processSIPMessage(SIPMessage message) {
+	public void processSIPMessage(SIPMessageInt message) {
 		try {
 			sipMessageListener.processMessage(message);
 		} catch (Exception e) {

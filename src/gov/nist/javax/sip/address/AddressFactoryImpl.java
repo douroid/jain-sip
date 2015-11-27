@@ -98,9 +98,8 @@ public class AddressFactoryImpl implements AddressFactoryEx {
         if (uri == null) {
             throw new NullPointerException("null address");
         }
-        AddressImpl addressImpl = new AddressImpl();
-        addressImpl.setURI(uri);
-        return addressImpl;
+        io.pkts.packet.sip.address.Address build = io.pkts.packet.sip.address.Address.with((io.pkts.packet.sip.address.URI) uri).build();
+        return build;
     }
 
     /**
@@ -133,10 +132,9 @@ public class AddressFactoryImpl implements AddressFactoryEx {
             throw new NullPointerException("null URI");
         }
         try {
-            StringMsgParser smp = new StringMsgParser();
-            SipUri sipUri = smp.parseSIPUrl(uri);
-            return (SipURI) sipUri;
-        } catch (ParseException ex) {
+            SipURI sipUri = io.pkts.packet.sip.address.SipURI.frame(Buffers.wrap(uri));
+            return sipUri;
+        } catch (Exception ex) {
             throw new ParseException(ex.getMessage(), 0);
         }
 

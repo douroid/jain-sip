@@ -11,7 +11,7 @@ import gov.nist.javax.sip.header.RequestLine;
 import gov.nist.javax.sip.header.StatusLine;
 import gov.nist.javax.sip.header.To;
 import gov.nist.javax.sip.header.Via;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.parser.ParseExceptionListener;
@@ -177,7 +177,7 @@ final class SCTPMessageChannel extends MessageChannel
     }
 
     @Override
-    public void sendMessage(SIPMessage sipMessage) throws IOException {
+    public void sendMessage(SIPMessageInt sipMessage) throws IOException {
         byte[] msg = sipMessage.encodeAsBytes( this.getTransport() );
         this.sendMessage( msg, this.getPeerInetAddress(), this.getPeerPort(), false );
     }
@@ -232,7 +232,7 @@ final class SCTPMessageChannel extends MessageChannel
         rxBuffer.get( msg );
         rxBuffer.compact();
         try {
-            SIPMessage m = parser.parseSIPMessage( msg, true, true, this );
+            SIPMessageInt m = parser.parseSIPMessage( msg, true, true, this );
             this.processMessage( m, rxTime );
             rxTime = 0;    // reset for next message
         } catch (ParseException e) {
@@ -251,7 +251,7 @@ final class SCTPMessageChannel extends MessageChannel
      *
      * JvB: copied from UDPMessageChannel, TODO restructure
      */
-    private void processMessage( SIPMessage sipMessage, long rxTime ) {
+    private void processMessage( SIPMessageInt sipMessage, long rxTime ) {
         SIPTransactionStack sipStack = processor.getSIPStack();
          sipMessage.setRemoteAddress(this.peerAddress.getAddress());
          sipMessage.setRemotePort(this.getPeerPort());
@@ -356,7 +356,7 @@ final class SCTPMessageChannel extends MessageChannel
      *
      * JvB: copied from UDPMessageChannel, TODO restructure!
      */
-    public void handleException(ParseException ex, SIPMessage sipMessage,
+    public void handleException(ParseException ex, SIPMessageInt sipMessage,
             Class hdrClass, String header, String message)
             throws ParseException {
         if (getSIPStack().isLoggingEnabled())

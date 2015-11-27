@@ -25,7 +25,7 @@ public class SniffMessage implements ParseExceptionListener {
     String time;
     String sourceIP;
     String destIP;
-    SIPMessage sipMessage;
+    SIPMessageInt sipMessage;
 
     public SniffMessage() {
     }
@@ -188,7 +188,7 @@ public class SniffMessage implements ParseExceptionListener {
 
     public void handleException(
         ParseException ex,
-        SIPMessage sipMessage,
+        SIPMessageInt sipMessage,
         Class headerClass,
         String headerText,
         String messageText)

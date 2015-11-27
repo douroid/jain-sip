@@ -31,12 +31,12 @@ public class SipMessageStreamDecoder extends ByteToMessageDecoder {
      * the message and close down the connection (if we are using a connection
      * oriented protocol ie)
      */
-    public static final int MAX_ALLOWED_INITIAL_LINE_SIZE = 1024;
+    public static final int MAX_ALLOWED_INITIAL_LINE_SIZE = 256;
 
     /**
      * The maximum allowed size of ALL headers combined (in bytes).
      */
-    public static final int MAX_ALLOWED_HEADERS_SIZE = 8192;
+    public static final int MAX_ALLOWED_HEADERS_SIZE = 1024;
 
     public static final int MAX_ALLOWED_CONTENT_LENGTH = 2048;
 

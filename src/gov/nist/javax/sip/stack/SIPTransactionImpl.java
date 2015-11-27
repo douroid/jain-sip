@@ -36,7 +36,7 @@ import gov.nist.javax.sip.SipProviderImpl;
 import gov.nist.javax.sip.SipStackImpl;
 import gov.nist.javax.sip.address.AddressFactoryImpl;
 import gov.nist.javax.sip.header.Via;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.stack.SIPClientTransactionImpl.ExpiresTimerTask;
@@ -792,7 +792,7 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
      * @see gov.nist.javax.sip.stack.SIPTransaction#sendMessage(gov.nist.javax.sip.message.SIPMessage)
      */
     @Override
-    public void sendMessage(final SIPMessage messageToSend) throws IOException {
+    public void sendMessage(final SIPMessageInt messageToSend) throws IOException {
         // Use the peer address, port and transport
         // that was specified when the transaction was
         // created. Bug was noted by Bruce Evangelder
@@ -814,7 +814,7 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
             					public void run() {
             						try {
             							((TCPMessageChannel) channel)
-            							.processMessage((SIPMessage) messageToSend.clone(), getPeerInetAddress());
+            							.processMessage((SIPMessageInt) messageToSend.clone(), getPeerInetAddress());
             						} catch (Exception ex) {
 
             							if (logger.isLoggingEnabled(ServerLogger.TRACE_ERROR)) {
@@ -843,7 +843,7 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
             					public void run() {
             						try {
             							((TLSMessageChannel) channel)
-            							.processMessage((SIPMessage) messageToSend.clone(), getPeerInetAddress());
+            							.processMessage((SIPMessageInt) messageToSend.clone(), getPeerInetAddress());
             						} catch (Exception ex) {
             							if (logger.isLoggingEnabled(ServerLogger.TRACE_ERROR)) {
             								logger.logError("Error self routing TLS message cause by: ", ex);
@@ -867,7 +867,7 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
     							
     							public void run() {
     								try {
-    									((RawMessageChannel) channel).processMessage((SIPMessage) messageToSend.clone());
+    									((RawMessageChannel) channel).processMessage((SIPMessageInt) messageToSend.clone());
     								} catch (Exception ex) {
     									if (logger.isLoggingEnabled(ServerLogger.TRACE_ERROR)) {
     						        		logger.logError("Error self routing message cause by: ", ex);
@@ -1486,7 +1486,7 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
      * @see gov.nist.javax.sip.stack.SIPTransaction#isMessagePartOfTransaction(gov.nist.javax.sip.message.SIPMessage)
      */
     @Override
-    public abstract boolean isMessagePartOfTransaction(SIPMessage messageToTest);
+    public abstract boolean isMessagePartOfTransaction(SIPMessageInt messageToTest);
 
     /*
      * (non-Javadoc)

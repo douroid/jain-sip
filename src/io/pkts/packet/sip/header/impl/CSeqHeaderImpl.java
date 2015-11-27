@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package io.pkts.packet.sip.header.impl;
 
@@ -11,10 +11,9 @@ import static java.lang.Math.toIntExact;
 import java.text.ParseException;
 import javax.sip.InvalidArgumentException;
 
-
 /**
  * @author jonas@jonasborjesson.com
- * 
+ *
  */
 public final class CSeqHeaderImpl extends SipHeaderImpl implements CSeqHeader {
 
@@ -22,7 +21,7 @@ public final class CSeqHeaderImpl extends SipHeaderImpl implements CSeqHeader {
     private final Buffer method;
 
     /**
-     * 
+     *
      */
     public CSeqHeaderImpl(final long cseqNumber, final Buffer method, final Buffer value) {
         super(CSeqHeader.NAME, value);
@@ -75,9 +74,14 @@ public final class CSeqHeaderImpl extends SipHeaderImpl implements CSeqHeader {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    private String methodStr = null;
+
     @Override
     public String getMethod() {
-        return getMethodIO().toString();
+        if (methodStr == null) {
+            methodStr = getMethodIO().toString();
+        }
+        return methodStr;
     }
 
     @Override

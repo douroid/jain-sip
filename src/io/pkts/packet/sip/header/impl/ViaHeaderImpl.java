@@ -165,7 +165,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
      */
     @Override
     public Buffer getValue() {
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         transferValue(buffer);
         return buffer;
     }
@@ -327,7 +327,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
     public String toString() {
         // TODO: need to do something else. This is probably
         // not that efficient but performance testing will reveal
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         getBytes(buffer);
         return buffer.toString();
     }
@@ -367,7 +367,7 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
     public ViaHeader clone() {
         // TODO: probably inefficient and could also be plain wrong in that
         // we may not generate a large enough buffer (probably less likely though).
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         transferValue(buffer);
         try {
             return ViaHeader.frame(buffer);
@@ -386,9 +386,14 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    private String hostStr = null;
+
     @Override
     public String getHost() {
-        return getHostIO().toString();
+        if (hostStr == null) {
+            hostStr = getHostIO().toString();
+        }
+        return hostStr;
     }
 
     @Override
@@ -396,9 +401,14 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    private String transportStr = null;
+
     @Override
     public String getTransport() {
-        return getTransportIO().toString();
+        if (transportStr == null) {
+            transportStr = getTransportIO().toString();
+        }
+        return transportStr;
     }
 
     @Override
@@ -441,9 +451,14 @@ public final class ViaHeaderImpl implements ViaHeader, SipHeader, Parameters {
         setReceived(Buffers.wrap(received));
     }
 
+    private String branch = null;
+
     @Override
     public String getBranch() {
-        return getBranchIO().toString();
+        if (branch == null) {
+            branch = getBranchIO().toString();
+        }
+        return branch;
     }
 
     @Override

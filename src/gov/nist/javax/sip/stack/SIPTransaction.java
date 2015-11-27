@@ -28,7 +28,7 @@ package gov.nist.javax.sip.stack;
 import gov.nist.javax.sip.SipProviderImpl;
 import gov.nist.javax.sip.TransactionExt;
 import gov.nist.javax.sip.header.Via;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 
@@ -253,7 +253,7 @@ public interface SIPTransaction extends TransactionExt {
    * @param messageToSend
    *          Message to send to the SIP peer.
    */
-  public void sendMessage(SIPMessage messageToSend) throws IOException;
+  public void sendMessage(SIPMessageInt messageToSend) throws IOException;
 
   /**
    * Adds a new event listener to this transaction.
@@ -458,7 +458,7 @@ public interface SIPTransaction extends TransactionExt {
    * 
    * @return True if the message is part of this transaction, false if not.
    */
-  public boolean isMessagePartOfTransaction(SIPMessage messageToTest);
+  public boolean isMessagePartOfTransaction(SIPMessageInt messageToTest);
 
   /*
    * (non-Javadoc)

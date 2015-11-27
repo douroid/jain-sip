@@ -38,7 +38,7 @@ import gov.nist.javax.sip.SipStackImpl;
 import gov.nist.javax.sip.header.RetryAfter;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.header.ViaList;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.parser.Pipeline;
@@ -168,7 +168,7 @@ public abstract class ConnectionOrientedMessageChannel extends MessageChannel im
      * @throws IOException
      *             If there is an error sending the message
      */
-    public void sendMessage(final SIPMessage sipMessage) throws IOException {
+    public void sendMessage(final SIPMessageInt sipMessage) throws IOException {
 
         if ( logger.isLoggingEnabled(LogWriter.TRACE_DEBUG) && !sipMessage.isNullRequest() ) {
             logger.logDebug("sendMessage:: " + sipMessage.getFirstLine() + " cseq method = " + sipMessage.getCSeq().getMethod());
@@ -185,7 +185,7 @@ public abstract class ConnectionOrientedMessageChannel extends MessageChannel im
 
                     public void run() {
                         try {
-                            processMessage((SIPMessage) sipMessage.clone());
+                            processMessage((SIPMessageInt) sipMessage.clone());
                         } catch (Exception ex) {
                             if (logger
                                     .isLoggingEnabled(ServerLogger.TRACE_ERROR)) {
@@ -251,7 +251,7 @@ public abstract class ConnectionOrientedMessageChannel extends MessageChannel im
 
 	protected abstract void sendMessage(byte[] msg, boolean b) throws IOException;
 	
-	public void processMessage(SIPMessage sipMessage, InetAddress address) {
+	public void processMessage(SIPMessageInt sipMessage, InetAddress address) {
         this.peerAddress = address;
         try {
             processMessage(sipMessage);
@@ -275,7 +275,7 @@ public abstract class ConnectionOrientedMessageChannel extends MessageChannel im
      *            Jvb: note that this code is identical to TCPMessageChannel,
      *            refactor some day
      */
-    public void processMessage(SIPMessage sipMessage) throws Exception {
+    public void processMessage(SIPMessageInt sipMessage) throws Exception {
         try {
         	
             sipMessage.setRemoteAddress(this.peerAddress);

@@ -166,6 +166,8 @@ public class SipParser {
     public static final Buffer SCTP = Buffers.wrap("sctp");
 
     public static final Buffer WS = Buffers.wrap("ws");
+    
+    public static final Buffer LR_PARAM = Buffers.wrap("lr");    
 
     public static final Map<Buffer, Function<SipHeader, ? extends SipHeader>> framers = new HashMap<>();
 

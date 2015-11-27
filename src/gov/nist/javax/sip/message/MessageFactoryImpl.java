@@ -238,9 +238,9 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                     "JAIN-SIP Exception, some parameters are missing"
                             + ", unable to create the request", 0);
 
-        SIPRequest sipRequest = new SIPRequestImpl();
-        sipRequest.setRequestURI(requestURI);
-        sipRequest.setMethod(method);
+        SIPRequest sipRequest = new SIPRequestImpl(method,requestURI.toString());
+        /*sipRequest.setRequestURI(requestURI);
+        sipRequest.setMethod(method);*/
         sipRequest.setCallId(callId);
         sipRequest.setCSeq(cSeq);
         sipRequest.setFrom(from);
@@ -507,7 +507,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
         sipResponse.removeContent();
         sipResponse.removeHeader(ContentTypeHeader.NAME);
         if (server != null) {
-            sipResponse.setHeader(server);
+            //TODO sipResponse.setHeader(server);
         }
         return sipResponse;
     }
@@ -706,7 +706,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
         ParseExceptionListener parseExceptionListener = new ParseExceptionListener() {
 
             public void handleException(ParseException ex,
-                    SIPMessage sipMessage, Class headerClass,
+                    SIPMessageInt sipMessage, Class headerClass,
                     String headerText, String messageText)
                     throws ParseException {
                 // Rethrow the error for the essential headers. Otherwise bad
@@ -733,7 +733,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
         if (this.testing)
             exHandler = parseExceptionListener;
 
-        SIPMessage sipMessage = smp.parseSIPMessage(requestString.getBytes(), true, this.strict, exHandler);
+        SIPMessageInt sipMessage = smp.parseSIPMessage(requestString.getBytes(), true, this.strict, exHandler);
 
         if (!(sipMessage instanceof SIPRequest))
             throw new ParseException(requestString, 0);
@@ -756,7 +756,7 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
 
         StringMsgParser smp = new StringMsgParser();
 
-        SIPMessage sipMessage = smp.parseSIPMessage(responseString.getBytes(), true, false, null);
+        SIPMessageInt sipMessage = smp.parseSIPMessage(responseString.getBytes(), true, false, null);
 
         if (!(sipMessage instanceof SIPResponse))
             throw new ParseException(responseString, 0);

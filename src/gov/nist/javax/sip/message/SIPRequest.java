@@ -63,7 +63,7 @@ import javax.sip.SipException;
  *
  *
  */
-public interface SIPRequest extends SIPMessage, javax.sip.message.Request, RequestExt {
+public interface SIPRequest extends SIPMessageInt, javax.sip.message.Request, RequestExt {
 
     static final String DEFAULT_USER = "ip";
 

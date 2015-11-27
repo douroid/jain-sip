@@ -44,7 +44,7 @@ import gov.nist.javax.sip.header.NameMap;
 import gov.nist.javax.sip.header.RequestLine;
 import gov.nist.javax.sip.header.SIPHeader;
 import gov.nist.javax.sip.header.StatusLine;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPRequestImpl;
 import gov.nist.javax.sip.message.SIPResponse;
@@ -108,7 +108,7 @@ public class StringMsgParser implements MessageParser {
      *                (and the rest of the buffer is discarded).
      * @see ParseExceptionListener
      */
-    public SIPMessage parseSIPMessage(byte[] msgBuffer, boolean readBody, boolean strict, ParseExceptionListener parseExceptionListener) throws ParseException {
+    public SIPMessageInt parseSIPMessage(byte[] msgBuffer, boolean readBody, boolean strict, ParseExceptionListener parseExceptionListener) throws ParseException {
         if (msgBuffer == null || msgBuffer.length == 0)
             return null;
 
@@ -131,7 +131,7 @@ public class StringMsgParser implements MessageParser {
         String currentLine = null;
         String currentHeader = null;
         boolean isFirstLine = true;
-        SIPMessage message = null;
+        SIPMessageInt message = null;
         do
         {
             int lineStart = i;
@@ -232,8 +232,8 @@ public class StringMsgParser implements MessageParser {
         return line.substring(0, i+1);
     }
 
-    protected SIPMessage processFirstLine(String firstLine, ParseExceptionListener parseExceptionListener, byte[] msgBuffer) throws ParseException {
-        SIPMessage message;
+    protected SIPMessageInt processFirstLine(String firstLine, ParseExceptionListener parseExceptionListener, byte[] msgBuffer) throws ParseException {
+        SIPMessageInt message;
         if (!firstLine.startsWith(SIPConstants.SIP_VERSION_STRING)) {
             message = new SIPRequestImpl();//TODO use factory
             try {
@@ -273,7 +273,7 @@ public class StringMsgParser implements MessageParser {
         return message;
     }
 
-    protected void processHeader(String header, SIPMessage message, ParseExceptionListener parseExceptionListener, byte[] rawMessage) throws ParseException {
+    protected void processHeader(String header, SIPMessageInt message, ParseExceptionListener parseExceptionListener, byte[] rawMessage) throws ParseException {
         if (header == null || header.length() == 0)
             return;
 
@@ -574,7 +574,7 @@ public class StringMsgParser implements MessageParser {
                 for (int i = 0; i < messages.length; i++) {
                     StringMsgParser smp = new StringMsgParser();
                     try {
-                        SIPMessage sipMessage = smp
+                        SIPMessageInt sipMessage = smp
                                 .parseSIPMessage(messages[i].getBytes(), true, false, null);
                         System.out.println(" i = " + i + " branchId = "
                                 + sipMessage.getTopmostVia().getBranch());

@@ -11,7 +11,7 @@ import gov.nist.core.ServerLogger;
 import gov.nist.javax.sip.LogRecord;
 import gov.nist.javax.sip.LogRecordFactory;
 import gov.nist.javax.sip.header.CallID;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.stack.SIPTransactionStack;
 
 public class ServerLoggerImpl implements ServerLogger {
@@ -33,7 +33,7 @@ public class ServerLoggerImpl implements ServerLogger {
         sipStack.getStackLogger().logStackTrace();
     }
 
-    public void logMessage(SIPMessage message, String source, String destination, boolean isSender, long timeStamp) {
+    public void logMessage(SIPMessageInt message, String source, String destination, boolean isSender, long timeStamp) {
         String firstLine = message.getFirstLine();
         String tid = message.getTransactionId();
         String callId = message.getCallId().getCallId();
@@ -44,11 +44,11 @@ public class ServerLoggerImpl implements ServerLogger {
         
     }
 
-    public void logMessage(SIPMessage message, String from, String to, String status, boolean sender) {
+    public void logMessage(SIPMessageInt message, String from, String to, String status, boolean sender) {
         logMessage(message, from, to, status, sender, System.currentTimeMillis());
     }
 
-    public void logMessage(SIPMessage message, String source, String destination, String status, boolean isSender,
+    public void logMessage(SIPMessageInt message, String source, String destination, String status, boolean isSender,
             long timeStamp) {
         // TODO Auto-generated method stub
         CallID cid = (CallID) message.getCallId();

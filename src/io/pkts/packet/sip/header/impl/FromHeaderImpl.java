@@ -35,7 +35,7 @@ public class FromHeaderImpl extends AddressParametersHeaderImpl implements FromH
 
     @Override
     public FromHeader clone() {
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         transferValue(buffer);
         try {
             return FromHeader.frame(buffer);
@@ -54,9 +54,13 @@ public class FromHeaderImpl extends AddressParametersHeaderImpl implements FromH
         setParameter(TAG, Buffers.wrap(tag));
     }
 
+    private String tagStr = null;
     @Override
     public String getTag() {
-        return getTagIO().toString();
+        if (tagStr == null) {
+        tagStr = getTagIO().toString();
+        }
+        return tagStr;
     }
 
 }

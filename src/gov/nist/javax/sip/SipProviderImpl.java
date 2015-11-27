@@ -38,7 +38,7 @@ import gov.nist.javax.sip.address.RouterExt;
 import gov.nist.javax.sip.header.CallID;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.message.RequestExt;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.stack.HopImpl;
@@ -725,7 +725,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
             }
             
             if (messageChannel != null) {
-                messageChannel.sendMessage((SIPMessage) sipRequest,hop);
+                messageChannel.sendMessage((SIPMessageInt) sipRequest,hop);
             } else {
                 if ( logger.isLoggingEnabled(LogLevels.TRACE_DEBUG) ) {
                     logger.logDebug("Could not create a message channel for " + hop.toString() + " listeningPoints = " + this.listeningPoints);
@@ -764,7 +764,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
         ViaHeader via = sipResponse.getTopmostVia();
         if (via == null)
             throw new SipException("No via header in response!");
-        SIPServerTransaction st = (SIPServerTransaction) sipStack.findTransaction((SIPMessage)response, true);
+        SIPServerTransaction st = (SIPServerTransaction) sipStack.findTransaction((SIPMessageInt)response, true);
         if ( st != null   && st.getInternalState() != TransactionState._TERMINATED && this.isAutomaticDialogSupportEnabled()) {
             throw new SipException("Transaction exists -- cannot send response statelessly");
         }

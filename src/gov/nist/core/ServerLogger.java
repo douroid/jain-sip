@@ -20,7 +20,7 @@ import java.util.Properties;
 
 import javax.sip.SipStack;
 
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 
 /**
  * @author jean.deruelle@gmail.com
@@ -31,12 +31,12 @@ public interface ServerLogger extends LogLevels {
    
 	 void closeLogFile();
 	 
-	 void logMessage(SIPMessage message, String from, String to, boolean sender, long time);
+	 void logMessage(SIPMessageInt message, String from, String to, boolean sender, long time);
 	 
-	 void logMessage(SIPMessage message, String from, String to, String status,
+	 void logMessage(SIPMessageInt message, String from, String to, String status,
 	            boolean sender, long time);
 	 
-	 void logMessage(SIPMessage message, String from, String to, String status,
+	 void logMessage(SIPMessageInt message, String from, String to, String status,
 	            boolean sender);
 	            	
 	 void logException(Exception ex);

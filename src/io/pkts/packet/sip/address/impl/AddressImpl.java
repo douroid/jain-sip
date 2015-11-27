@@ -199,7 +199,7 @@ public final class AddressImpl implements Address {
      */
     @Override
     public Buffer toBuffer() {
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         getBytes(buffer);
         return buffer;
     }

@@ -7,6 +7,9 @@ import android.javax.sip.message.*;
 
 import java.text.ParseException;
 import java.util.*;
+import javax.sip.RequestEvent;
+import javax.sip.ServerTransaction;
+import javax.sip.message.Request;
 
 /**
  * This class is a UAC template for android JSIP stack

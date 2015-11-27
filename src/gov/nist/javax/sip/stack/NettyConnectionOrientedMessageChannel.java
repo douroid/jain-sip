@@ -38,8 +38,8 @@ import gov.nist.javax.sip.SipStackImpl;
 import gov.nist.javax.sip.header.RetryAfter;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.header.ViaList;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPMessage;
-import gov.nist.javax.sip.message.SIPMessageImpl;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPRequestImpl;
 import gov.nist.javax.sip.message.SIPResponse;
@@ -176,7 +176,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
      * @param sipMessage Message to send.
      * @throws IOException If there is an error sending the message
      */
-    public void sendMessage(final SIPMessage sipMessage) throws IOException {
+    public void sendMessage(final SIPMessageInt sipMessage) throws IOException {
 
         if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG) && !sipMessage.isNullRequest()) {
             logger.logDebug("sendMessage:: " + sipMessage.getFirstLine() + " cseq method = " + sipMessage.getCSeq().getMethod());
@@ -193,7 +193,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
 
                     public void run() {
                         try {
-                            processMessage((SIPMessage) sipMessage.clone());
+                            processMessage((SIPMessageInt) sipMessage.clone());
                         } catch (Exception ex) {
                             if (logger
                                     .isLoggingEnabled(ServerLogger.TRACE_ERROR)) {
@@ -242,7 +242,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
 
         // JvB: also retry for responses, if the connection is gone we should
         // try to reconnect
-        SIPMessageImpl msgImpl = (SIPMessageImpl) sipMessage;
+        SIPMessage msgImpl = (SIPMessage) sipMessage;
         conn.send(msgImpl.getMsgImpl());
 
         if (logger.isLoggingEnabled(
@@ -260,7 +260,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
 
     protected abstract void sendMessage(byte[] msg, boolean b) throws IOException;
 
-    public void processMessage(SIPMessage sipMessage, InetAddress address) {
+    public void processMessage(SIPMessageInt sipMessage, InetAddress address) {
         this.peerAddress = address;
         try {
             processMessage(sipMessage);
@@ -284,7 +284,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
      * day
      */
     @Override
-    public void processMessage(SIPMessage sipMessage) throws Exception {
+    public void processMessage(SIPMessageInt sipMessage) throws Exception {
         try {
 
             sipMessage.setRemoteAddress(this.peerAddress);
@@ -295,13 +295,12 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
             sipMessage.setPeerPacketSourceAddress(this.peerAddress);
             sipMessage.setPeerPacketSourcePort(this.peerPort);
 
-            ViaList viaList = sipMessage.getViaHeaders();
             // For a request
             // first via header tells where the message is coming from.
             // For response, this has already been recorded in the outgoing
             // message.
             if (sipMessage instanceof SIPRequest) {
-                ViaHeader v = (ViaHeader) viaList.getFirst();
+                ViaHeader v = sipMessage.getTopmostVia();
                 // the peer address and tag it appropriately.
                 HopImpl viaHop = new HopImpl(v.getHost(),
                         v.getPort(),v.getTransport());                
@@ -854,7 +853,7 @@ public abstract class NettyConnectionOrientedMessageChannel extends MessageChann
         }
     }
 
-    protected Connection conn;
+    protected volatile Connection conn;
 
     @Override
     public void channelRead0(ChannelHandlerContext chc, SipMessageEvent i) throws Exception {

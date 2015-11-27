@@ -45,7 +45,7 @@ import gov.nist.javax.sip.header.RequestLine;
 import gov.nist.javax.sip.header.StatusLine;
 import gov.nist.javax.sip.header.To;
 import gov.nist.javax.sip.header.Via;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.parser.MessageParser;
@@ -352,7 +352,7 @@ public class UDPMessageChannel extends MessageChannel implements
 
         }
 
-        SIPMessage sipMessage = null;
+        SIPMessageInt sipMessage = null;
         try {
             this.receptionTime = System.currentTimeMillis();
             sipMessage = myParser.parseSIPMessage(msgBytes, true, false, this);
@@ -521,7 +521,7 @@ public class UDPMessageChannel extends MessageChannel implements
      *
      * @param sipMessage
      */
-    public void processMessage(SIPMessage sipMessage) {
+    public void processMessage(SIPMessageInt sipMessage) {
         sipMessage.setRemoteAddress(this.peerAddress);
         sipMessage.setRemotePort(this.getPeerPort());
         sipMessage.setLocalPort(this.getPort());
@@ -650,7 +650,7 @@ public class UDPMessageChannel extends MessageChannel implements
      * @throws ParseException
      *             If we choose to reject the header or message.
      */
-    public void handleException(ParseException ex, SIPMessage sipMessage,
+    public void handleException(ParseException ex, SIPMessageInt sipMessage,
             Class hdrClass, String header, String message)
             throws ParseException {
         if (logger.isLoggingEnabled())
@@ -683,7 +683,7 @@ public class UDPMessageChannel extends MessageChannel implements
      * @throws IOException
      *             If there is a problem with sending the message.
      */
-    public void sendMessage(final SIPMessage sipMessage) throws IOException {
+    public void sendMessage(final SIPMessageInt sipMessage) throws IOException {
         if (logger.isLoggingEnabled(LogLevels.TRACE_INFO)
                 && this.sipStack.isLogStackTraceOnMessageSend()) {
             if (sipMessage instanceof SIPRequest
@@ -720,7 +720,7 @@ public class UDPMessageChannel extends MessageChannel implements
                             public void run() {
                                 try {
                                     ((RawMessageChannel) channel)
-                                            .processMessage((SIPMessage) sipMessage.clone());
+                                            .processMessage((SIPMessageInt) sipMessage.clone());
                                 } catch (Exception ex) {
                                     if (logger
                                             .isLoggingEnabled(

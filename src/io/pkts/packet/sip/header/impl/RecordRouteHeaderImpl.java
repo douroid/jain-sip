@@ -26,7 +26,7 @@ public class RecordRouteHeaderImpl extends AddressParametersHeaderImpl implement
 
     @Override
     public RecordRouteHeader clone() {
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         transferValue(buffer);
         try {
             return RecordRouteHeader.frame(buffer);

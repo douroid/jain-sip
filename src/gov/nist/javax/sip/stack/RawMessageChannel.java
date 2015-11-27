@@ -25,10 +25,10 @@
  */
 package gov.nist.javax.sip.stack;
 
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 
 public interface RawMessageChannel {
 
-    public abstract void processMessage(SIPMessage sipMessage) throws Exception ;
+    public abstract void processMessage(SIPMessageInt sipMessage) throws Exception ;
 
 }

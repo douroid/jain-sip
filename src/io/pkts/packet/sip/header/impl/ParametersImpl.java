@@ -9,7 +9,11 @@ import io.pkts.buffer.Buffers;
 import io.pkts.packet.sip.SipParseException;
 import io.pkts.packet.sip.header.Parameters;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import java.util.function.Supplier;
 
@@ -92,7 +96,12 @@ public abstract class ParametersImpl extends SipHeaderImpl implements Parameters
 
     @Override
     public final Iterator getParameterNames() {
-        throw new UnsupportedOperationException();
+        Set<Map.Entry<Buffer, Buffer>> allParameters = support.getAllParameters();
+        List<String> paramNames = new ArrayList();
+        for (Map.Entry<Buffer, Buffer> mEntry : allParameters){
+            paramNames.add(mEntry.getKey().toString());
+        }
+        return paramNames.iterator();
     }
 
     @Override

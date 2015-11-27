@@ -83,8 +83,7 @@ public class RequestLine extends SIPObject implements SipRequestLine {
      * @see gov.nist.javax.sip.header.SipRequestLine#getUri()
      */
     public URI getUri() {
-        GenericURI uri = new SipUri((io.pkts.packet.sip.address.SipURI)reqLine.getRequestUri());
-        return uri;
+        return reqLine.getRequestUri();
     }
 
     /** Constructor given the request URI and the method.

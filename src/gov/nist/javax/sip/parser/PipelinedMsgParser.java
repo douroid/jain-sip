@@ -42,7 +42,7 @@ import gov.nist.core.LogLevels;
 import gov.nist.core.LogWriter;
 import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.header.ContentLength;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.stack.BlockingQueueDispatchAuditor;
 import gov.nist.javax.sip.stack.ConnectionOrientedMessageChannel;
 import gov.nist.javax.sip.stack.QueuedMessageDispatchBase;
@@ -267,7 +267,7 @@ public final class PipelinedMsgParser implements Runnable {
             // we acquire it in the thread to avoid blocking other messages with a different call id
             // that could be processed in parallel                                    
             Semaphore semaphore = callIDOrderingStructure.getSemaphore();
-            final Queue<SIPMessage> messagesForCallID = callIDOrderingStructure.getMessagesForCallID();
+            final Queue<SIPMessageInt> messagesForCallID = callIDOrderingStructure.getMessagesForCallID();
             if(sipStack.sipEventInterceptor != null) {
             	sipStack.sipEventInterceptor.beforeMessage(messagesForCallID.peek());
             }
@@ -277,7 +277,7 @@ public final class PipelinedMsgParser implements Runnable {
                 logger.logError("Semaphore acquisition for callId " + callId + " interrupted", e);
             }
             // once acquired we get the first message to process
-            SIPMessage message = messagesForCallID.poll();
+            SIPMessageInt message = messagesForCallID.poll();
             if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
             	logger.logDebug("semaphore acquired for message " + message);
             }
@@ -453,7 +453,7 @@ public final class PipelinedMsgParser implements Runnable {
                 inputBuffer.append(line2);               
 //                smp.setParseExceptionListener(sipMessageListener);
 //                smp.setReadBody(false);
-                SIPMessage sipMessage = null;
+                SIPMessageInt sipMessage = null;
 
                 try {
                     if (stackLogger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
@@ -597,11 +597,11 @@ public final class PipelinedMsgParser implements Runnable {
      */
     class CallIDOrderingStructure {
         private Semaphore semaphore;
-        private Queue<SIPMessage> messagesForCallID;
+        private Queue<SIPMessageInt> messagesForCallID;
         
         public CallIDOrderingStructure() {
             semaphore = new Semaphore(1, true);
-            messagesForCallID = new ConcurrentLinkedQueue<SIPMessage>();
+            messagesForCallID = new ConcurrentLinkedQueue<SIPMessageInt>();
         }        
 
         /**
@@ -614,7 +614,7 @@ public final class PipelinedMsgParser implements Runnable {
         /**
          * @return the messagesForCallID
          */
-        public Queue<SIPMessage> getMessagesForCallID() {
+        public Queue<SIPMessageInt> getMessagesForCallID() {
             return messagesForCallID;
         }
     }

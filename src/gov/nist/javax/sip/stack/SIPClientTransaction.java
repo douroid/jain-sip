@@ -3,7 +3,7 @@ package gov.nist.javax.sip.stack;
 import gov.nist.javax.sip.ClientTransactionExt;
 import gov.nist.javax.sip.header.Event;
 import gov.nist.javax.sip.header.Via;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPResponse;
 
 import java.io.IOException;
@@ -37,14 +37,14 @@ public interface SIPClientTransaction extends ClientTransactionExt, SIPTransacti
    * 
    * @return true if the message is part of this transaction, false if not.
    */
-  public abstract boolean isMessagePartOfTransaction(SIPMessage messageToTest);
+  public abstract boolean isMessagePartOfTransaction(SIPMessageInt messageToTest);
 
   /**
    * Send a request message through this transaction and onto the client.
    * 
    * @param messageToSend Request to process and send.
    */
-  public abstract void sendMessage(SIPMessage messageToSend) throws IOException;
+  public abstract void sendMessage(SIPMessageInt messageToSend) throws IOException;
 
   /**
    * Process a new response message through this transaction. If necessary, this message will

@@ -44,7 +44,7 @@ import gov.nist.javax.sip.header.NameMap;
 import gov.nist.javax.sip.header.RequestLine;
 import gov.nist.javax.sip.header.SIPHeader;
 import gov.nist.javax.sip.header.StatusLine;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPRequestImpl;
 import gov.nist.javax.sip.message.SIPResponse;
@@ -118,7 +118,7 @@ public class IOMsgParser implements MessageParser {
      * @see ParseExceptionListener
      */
     @Override
-    public SIPMessage parseSIPMessage(byte[] msgBuffer, boolean readBody, boolean strict, ParseExceptionListener parseExceptionListener) throws ParseException {
+    public SIPMessageInt parseSIPMessage(byte[] msgBuffer, boolean readBody, boolean strict, ParseExceptionListener parseExceptionListener) throws ParseException {
         RawMessage rawMessage = new RawMessage(MAX_ALLOWED_INITIAL_LINE_SIZE, MAX_ALLOWED_HEADERS_SIZE,
                 MAX_ALLOWED_CONTENT_LENGTH);   
         try {
@@ -131,11 +131,11 @@ public class IOMsgParser implements MessageParser {
         }
     }
     
-    private SIPMessage toSipMessage(final RawMessage raw) {
+    private SIPMessageInt toSipMessage(final RawMessage raw) {
         final SipInitialLine initialLine = SipInitialLine.parse(raw.getInitialLine());
         final Buffer headers = raw.getHeaders();
         final Buffer payload = raw.getPayload();
-        SIPMessage msg =  null;
+        SIPMessageInt msg =  null;
         if (initialLine.isRequestLine()) {
             SipRequestImpl sipRequestImpl = new SipRequestImpl((SipRequestLine) initialLine, headers, payload);
             msg = new SIPRequestImpl(sipRequestImpl);

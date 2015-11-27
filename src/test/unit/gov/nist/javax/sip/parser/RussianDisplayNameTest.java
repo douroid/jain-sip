@@ -4,7 +4,7 @@ import java.nio.charset.Charset;
 
 import javax.sip.header.FromHeader;
 
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.parser.StringMsgParser;
 import junit.framework.TestCase;
 
@@ -63,7 +63,7 @@ public class RussianDisplayNameTest extends TestCase {
 		
 			StringMsgParser smp = new StringMsgParser();
 	
-			SIPMessage message = smp.parseSIPMessage(messageToParse.getBytes("UTF-8"), true, false, null);
+			SIPMessageInt message = smp.parseSIPMessage(messageToParse.getBytes("UTF-8"), true, false, null);
 			
 			System.out.println("Message = " + message);
 			
@@ -85,7 +85,7 @@ public class RussianDisplayNameTest extends TestCase {
 		    	
 		    }
 		    smp = new StringMsgParser();
-		    SIPMessage reparsed = smp.parseSIPMessage(sipMessageBytes, true, false, null);
+		    SIPMessageInt reparsed = smp.parseSIPMessage(sipMessageBytes, true, false, null);
 		    
 		    System.out.println("Reparsed = " + reparsed);
 		    

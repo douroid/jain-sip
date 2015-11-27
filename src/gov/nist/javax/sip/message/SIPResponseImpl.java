@@ -52,7 +52,7 @@ import javax.sip.header.ViaHeader;
  *
  */
 public class SIPResponseImpl
-    extends SIPMessageImpl
+    extends SIPMessage
     implements SIPResponse, javax.sip.message.Response, ResponseExt {
     protected StatusLine statusLine;
     private boolean isRetransmission = true;

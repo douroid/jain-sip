@@ -1,6 +1,5 @@
 package io.pkts.packet.sip;
 
-import gov.nist.javax.sip.message.SIPMessage;
 import static io.pkts.packet.sip.impl.PreConditions.assertNotEmpty;
 import static io.pkts.packet.sip.impl.PreConditions.assertNotNull;
 import io.pkts.buffer.Buffer;
@@ -17,6 +16,7 @@ import io.pkts.packet.sip.header.RouteHeader;
 import io.pkts.packet.sip.header.SipHeader;
 import io.pkts.packet.sip.header.ToHeader;
 import io.pkts.packet.sip.header.ViaHeader;
+import io.pkts.packet.sip.impl.SipInitialLine;
 import io.pkts.packet.sip.impl.SipParser;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.util.List;
  * 
  */
 public interface SipMessage extends Cloneable, javax.sip.message.Message {
-
+    static final int DEFAULT_BUFFER_SIZE = 1024;
     /**
      * The first line of a sip message, which is either a request or a response
      * line
@@ -37,6 +37,8 @@ public interface SipMessage extends Cloneable, javax.sip.message.Message {
      * @return
      */
     Buffer getInitialLine();
+    
+    SipInitialLine getInitialLineInternal();
 
     /**
      * Got tired of casting the {@link SipMessage} into a {@link SipRequest} so

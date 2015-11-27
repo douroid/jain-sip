@@ -46,7 +46,7 @@ import gov.nist.core.CommonLogger;
 import gov.nist.core.LogWriter;
 import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.header.*;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 
 import javax.net.ssl.HandshakeCompletedListener;
 import javax.net.ssl.SSLSocket;
@@ -422,7 +422,7 @@ public class TLSMessageChannel extends ConnectionOrientedMessageChannel {
      * @throws ParseException
      *             Thrown if we want to reject the message.
      */
-    public void handleException(ParseException ex, SIPMessage sipMessage,
+    public void handleException(ParseException ex, SIPMessageInt sipMessage,
             Class hdrClass, String header, String message)
             throws ParseException {
         if (logger.isLoggingEnabled())

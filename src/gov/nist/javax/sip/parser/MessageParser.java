@@ -25,7 +25,7 @@ package gov.nist.javax.sip.parser;
 
 import java.text.ParseException;
 
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 
 
 /**
@@ -45,6 +45,6 @@ public interface MessageParser {
 	 * @return a SIPMessage object that the stack can interact with
 	 * @throws ParseException if a parseexception occurs
 	 */
-	SIPMessage parseSIPMessage(byte[] msgBytes, boolean readBody, boolean strict, ParseExceptionListener exhandler) throws ParseException;
+	SIPMessageInt parseSIPMessage(byte[] msgBytes, boolean readBody, boolean strict, ParseExceptionListener exhandler) throws ParseException;
 
 }

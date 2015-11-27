@@ -1,7 +1,7 @@
 package gov.nist.javax.sip.stack;
 
 import gov.nist.javax.sip.ServerTransactionExt;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 
 import java.io.IOException;
@@ -39,7 +39,7 @@ public interface SIPServerTransaction extends SIPTransaction, ServerTransaction,
    *
    * @return True if the message is part of this transaction, false if not.
    */
-  public  boolean isMessagePartOfTransaction(SIPMessage messageToTest);
+  public  boolean isMessagePartOfTransaction(SIPMessageInt messageToTest);
   
   /**
    * Return true if the transaction is known to stack.
@@ -68,7 +68,7 @@ public interface SIPServerTransaction extends SIPTransaction, ServerTransaction,
    *
    * @param messageToSend Response to process and send.
    */
-  public  void sendMessage(SIPMessage messageToSend) throws IOException;
+  public  void sendMessage(SIPMessageInt messageToSend) throws IOException;
 
   public  String getViaHost();
 

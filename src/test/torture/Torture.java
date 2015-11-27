@@ -164,7 +164,7 @@ public class Torture extends DefaultHandler implements ParseExceptionListener,
         failureFlag = true;
     }
 
-    public void handleException(ParseException ex, SIPMessage sipMessage,
+    public void handleException(ParseException ex, SIPMessageInt sipMessage,
             Class headerClass, String headerText, String messageText)
             throws ParseException {
         String exceptionString = headerText;
@@ -357,7 +357,7 @@ public class Torture extends DefaultHandler implements ParseExceptionListener,
             // stringParser.disableInputTracking();
 
 //            stringParser.setParseExceptionListener(this);
-            SIPMessage sipMessage = null;
+            SIPMessageInt sipMessage = null;
             SIPHeader sipHeader = null;
             SipUri sipURL = null;
             try {

@@ -41,6 +41,7 @@ import gov.nist.javax.sip.header.To;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.header.ViaList;
 import gov.nist.javax.sip.stack.SIPTransactionStack;
+import io.pkts.buffer.Buffers;
 
 import java.text.ParseException;
 import java.util.HashSet;
@@ -93,7 +94,7 @@ import javax.sip.message.Request;
  *
  *
  */
-public class SIPRequestImpl extends SIPMessageImpl implements SIPRequest, javax.sip.message.Request, RequestExt {
+public class SIPRequestImpl extends SIPMessage implements SIPRequest, javax.sip.message.Request, RequestExt {
 
     private static final long serialVersionUID = 3360720013577322927L;
 
@@ -222,11 +223,19 @@ public class SIPRequestImpl extends SIPMessageImpl implements SIPRequest, javax.
     public SIPRequestImpl() {
         super();
     }
+    
+    public SIPRequestImpl(String method, String requestURI) {
+        super(SipRequest.request(Buffers.wrap(method), requestURI).build());
+        request = (SipRequest) this.msgImpl;
+        SipInitialLine line = request.getInitialLineInternal();
+        requestLine = new RequestLine((SipRequestLine) line);        
+    }
+    
 
     public SIPRequestImpl(SipRequest msg) {
         super(msg);
         request = msg;
-        SipInitialLine line = SipInitialLine.parse(request.getInitialLine());
+        SipInitialLine line = request.getInitialLineInternal();
         requestLine = new RequestLine((SipRequestLine) line);
     }
 

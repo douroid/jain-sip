@@ -39,7 +39,7 @@ import gov.nist.javax.sip.header.Expires;
 import gov.nist.javax.sip.header.ParameterNames;
 import gov.nist.javax.sip.header.RSeq;
 import gov.nist.javax.sip.header.Via;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.stack.IllegalTransactionStateException.Reason;
@@ -547,7 +547,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
      * @see gov.nist.javax.sip.stack.SIPServerTransaction#isMessagePartOfTransaction(gov.nist.javax.sip.message.SIPMessage)
      */
     @Override
-    public boolean isMessagePartOfTransaction(SIPMessage messageToTest) {
+    public boolean isMessagePartOfTransaction(SIPMessageInt messageToTest) {
 
         // List of Via headers in the message to test
 //        ViaList viaHeaders;
@@ -877,7 +877,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
      * @see gov.nist.javax.sip.stack.SIPServerTransaction#sendMessage(gov.nist.javax.sip.message.SIPMessage)
      */
     @Override
-    public void sendMessage(SIPMessage messageToSend) throws IOException {
+    public void sendMessage(SIPMessageInt messageToSend) throws IOException {
         if ( logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
             logger.logDebug("sipServerTransaction::sendMessage " + messageToSend.getFirstLine());
         }
@@ -1395,7 +1395,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
                 && sipResponse.getHeader(ContactHeader.NAME) == null)
             throw new IllegalTransactionStateException("Contact Header is mandatory for the OK to the INVITE", Reason.ContactHeaderMandatory);
 
-        if (!this.isMessagePartOfTransaction((SIPMessage) response)) {
+        if (!this.isMessagePartOfTransaction((SIPMessageInt) response)) {
             throw new SipException("Response does not belong to this transaction.");
         }
 
@@ -1771,7 +1771,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
             this.provisionalResponseTask = new ProvisionalResponseTask();
             this.sipStack.getTimer().scheduleWithFixedDelay(provisionalResponseTask, 0,
                     SIPTransactionStack.BASE_TIMER_INTERVAL);
-            this.sendMessage((SIPMessage) relResponse);
+            this.sendMessage((SIPMessageInt) relResponse);
         } catch (Exception ex) {
             InternalErrorHandler.handleException(ex);
         }

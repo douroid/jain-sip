@@ -30,7 +30,7 @@ import gov.nist.core.LogLevels;
 import gov.nist.core.LogWriter;
 import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.SipStackImpl;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.stack.SSLStateMachine.MessageSendCallback;
 
@@ -173,7 +173,7 @@ public class NioTlsWebSocketMessageChannel extends NioWebSocketMessageChannel im
 	}
 	
 	@Override
-	public void sendMessage(final SIPMessage sipMessage, final InetAddress receiverAddress, final int receiverPort)
+	public void sendMessage(final SIPMessageInt sipMessage, final InetAddress receiverAddress, final int receiverPort)
             throws IOException {
 		
 		if(sipMessage instanceof SIPRequest && client && !httpClientRequestSent) {

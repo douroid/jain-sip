@@ -36,7 +36,7 @@ import gov.nist.javax.sip.header.RequestLine;
 import gov.nist.javax.sip.header.StatusLine;
 import gov.nist.javax.sip.header.To;
 import gov.nist.javax.sip.header.Via;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.SocketChannel;
 
@@ -196,7 +196,7 @@ public class NettyTcpMessageChannel extends NettyConnectionOrientedMessageChanne
      * @param header -- header that caused the error.
      * @throws ParseException Thrown if we want to reject the message.
      */
-    public void handleException(ParseException ex, SIPMessage sipMessage,
+    public void handleException(ParseException ex, SIPMessageInt sipMessage,
             Class hdrClass, String header, String message)
             throws ParseException {
         if (logger.isLoggingEnabled()) {

@@ -33,7 +33,7 @@ public final class ToHeaderImpl extends AddressParametersHeaderImpl implements T
 
     @Override
     public ToHeader clone() {
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         transferValue(buffer);
         try {
             return ToHeader.frame(buffer);

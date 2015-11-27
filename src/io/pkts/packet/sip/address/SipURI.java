@@ -21,7 +21,7 @@ import java.io.IOException;
  * 
  */
 public interface SipURI extends URI, javax.sip.address.SipURI {
-
+    static final int DEFAULT_BUFFER_SIZE = 256;
     /**
      * Get the user portion of this URI.
      * 

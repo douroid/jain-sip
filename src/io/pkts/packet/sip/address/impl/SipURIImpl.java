@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package io.pkts.packet.sip.address.impl;
 
@@ -12,7 +12,9 @@ import io.pkts.packet.sip.impl.SipParser;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.sip.InvalidArgumentException;
@@ -20,7 +22,7 @@ import javax.sip.InvalidArgumentException;
 /**
  * @author jonas@jonasborjesson.com
  */
-public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipURI {
+public class SipURIImpl extends URIImpl implements SipURI, javax.sip.address.SipURI {
 
     /**
      * The full raw sip(s) URI
@@ -59,23 +61,17 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
     private boolean isDirty = false;
 
     /**
-     * 
-     * @param isSips
-     *            whether this is a sip or sips URL
-     * @param userInfo
-     *            contains the so-called "userinfo" portion. Typically this is
-     *            just the user but can optionally contain a password as well.
-     *            See {@link SipParser#consumeUserInfoHostPort(Buffer)} for more
-     *            information.
-     * @param hostPort
-     *            contains the so-called "hostport", which is the domain +
-     *            optional port.
-     * @param paramsHeaders
-     *            any uri-parameters or headers that were on the SIP uri will be
-     *            in this buffer. If empty or null then there were none.
-     * @param original
-     *            the original buffer just because as long as no one is changing
-     *            the content we can just return this buffer fast and easy.
+     *
+     * @param isSips whether this is a sip or sips URL
+     * @param userInfo contains the so-called "userinfo" portion. Typically this
+     * is just the user but can optionally contain a password as well. See
+     * {@link SipParser#consumeUserInfoHostPort(Buffer)} for more information.
+     * @param hostPort contains the so-called "hostport", which is the domain +
+     * optional port.
+     * @param paramsHeaders any uri-parameters or headers that were on the SIP
+     * uri will be in this buffer. If empty or null then there were none.
+     * @param original the original buffer just because as long as no one is
+     * changing the content we can just return this buffer fast and easy.
      */
     public SipURIImpl(final boolean isSips, final Buffer userInfo, final Buffer host, final Buffer port,
             final Buffer paramsHeaders,
@@ -159,7 +155,7 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
         // TODO: need a better strategy around this.
         // Probably want to create a dynamic buffer
         // implementation where this is only the initial size
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         getBytes(buffer);
         this.isDirty = false;
         this.buffer = buffer.slice();
@@ -204,7 +200,7 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
             // been checked so should be impossible
             throw new RuntimeException(
                     "The port could not be parsed as an integer. This should not be possible. The port was "
-                            + this.port);
+                    + this.port);
         } catch (final IOException e) {
             throw new RuntimeException("IOException while extracting out the port. This should not be possible.");
         }
@@ -253,11 +249,10 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
         return getParameter(SipParser.METHOD);
     }
 
-
     /**
-     * Comparing two {@link SipURI}s aren't trivial and the full set of rules are described in
-     * RFC3261 section 19.1.4
-     * 
+     * Comparing two {@link SipURI}s aren't trivial and the full set of rules
+     * are described in RFC3261 section 19.1.4
+     *
      * {@inheritDoc}
      */
     @Override
@@ -330,8 +325,6 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
                 }
             }
 
-
-
         } catch (ClassCastException | NullPointerException e) {
             return false;
         }
@@ -341,11 +334,11 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
     }
 
     /**
-     * Now, the hash-code doesn't actually have to be unique for every little parameter and detail
-     * as the {@link #equals(Object)} method is checking, we just need to take enough stuff into
-     * account to have a good enough spread and then the equals-method would be used to sort out any
-     * ties.
-     * 
+     * Now, the hash-code doesn't actually have to be unique for every little
+     * parameter and detail as the {@link #equals(Object)} method is checking,
+     * we just need to take enough stuff into account to have a good enough
+     * spread and then the equals-method would be used to sort out any ties.
+     *
      * {@inheritDoc}
      */
     @Override
@@ -366,7 +359,6 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
         return toBuffer().toString();
     }
 
-
     @Override
     public Buffer getParameter(final Buffer name) throws SipParseException, IllegalArgumentException {
         return this.paramsSupport.getParameter(name);
@@ -379,18 +371,17 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
 
     @Override
     public void setParameter(final Buffer name, final Buffer value) throws SipParseException,
-    IllegalArgumentException {
+            IllegalArgumentException {
         this.isDirty = true;
         this.paramsSupport.setParameter(name, value);
     }
 
     @Override
     public void setParameter(final String name, final String value) throws SipParseException,
-    IllegalArgumentException {
+            IllegalArgumentException {
         this.isDirty = true;
         this.paramsSupport.setParameter(name, value);
     }
-
 
     @Override
     public void setParameter(final Buffer name, final int value) throws SipParseException, IllegalArgumentException {
@@ -401,7 +392,6 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
     public void setParameter(final String name, final int value) throws SipParseException, IllegalArgumentException {
         this.setParameter(Buffers.wrap(name), Buffers.wrap(value));
     }
-
 
     @Override
     public void setUser(String user) throws ParseException {
@@ -430,7 +420,7 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
 
     @Override
     public void setHost(String host) throws ParseException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //TODO this.host = Buffers.wrap(host);
     }
 
     @Override
@@ -465,7 +455,7 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
 
     @Override
     public void setTransportParam(String transport) throws ParseException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.setParameter(SipParser.TRANSPORT, Buffers.wrap(transport));
     }
 
     @Override
@@ -505,22 +495,35 @@ public class SipURIImpl extends URIImpl implements SipURI,javax.sip.address.SipU
 
     @Override
     public boolean hasLrParam() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return this.getParameter(SipParser.LR_PARAM) != null;
     }
 
     @Override
     public void setLrParam() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        this.setParameter(SipParser.LR_PARAM, Buffers.EMPTY_BUFFER);
     }
 
     @Override
     public String getParameter(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Buffer param = getParameter(Buffers.wrap(name));
+        if (param != null) {
+            return param.toString();
+        } else {
+            return null;
+        }
+
     }
 
     @Override
     public Iterator getParameterNames() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Set<Map.Entry<Buffer, Buffer>> allParameters = paramsSupport.getAllParameters();
+        List<String> paramNames = new ArrayList();
+        if (allParameters != null) {
+            for (Map.Entry<Buffer, Buffer> mEntry : allParameters) {
+                paramNames.add(mEntry.getKey().toString());
+            }
+        }
+        return paramNames.iterator();
     }
 
     @Override

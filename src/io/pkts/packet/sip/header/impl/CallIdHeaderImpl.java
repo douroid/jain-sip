@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package io.pkts.packet.sip.header.impl;
 
@@ -13,9 +13,9 @@ import java.util.UUID;
 
 /**
  * @author jonas@jonasborjesson.com
- * 
+ *
  */
-public final class CallIdHeaderImpl extends SipHeaderImpl implements CallIdHeader{
+public final class CallIdHeaderImpl extends SipHeaderImpl implements CallIdHeader {
 
     public CallIdHeaderImpl() {
         super(CallIdHeader.NAME, generateCallId());
@@ -100,9 +100,14 @@ public final class CallIdHeaderImpl extends SipHeaderImpl implements CallIdHeade
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    private String callIdStr = null;
+
     @Override
     public String getCallId() {
-        return getCallIdIO().toString();
+        if (callIdStr == null) {
+            callIdStr = getCallIdIO().toString();
+        }
+        return callIdStr;
     }
 
 }

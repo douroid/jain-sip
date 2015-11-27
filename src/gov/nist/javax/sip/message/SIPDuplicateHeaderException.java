@@ -46,11 +46,11 @@ public class SIPDuplicateHeaderException extends ParseException {
 
     private static final long serialVersionUID = 8241107266407879291L;
     protected SIPHeader sipHeader;
-    protected SIPMessage sipMessage;
+    protected SIPMessageInt sipMessage;
     public SIPDuplicateHeaderException(String msg) {
         super(msg, 0);
     }
-    public SIPMessage getSIPMessage() {
+    public SIPMessageInt getSIPMessage() {
         return sipMessage;
     }
 
@@ -62,7 +62,7 @@ public class SIPDuplicateHeaderException extends ParseException {
         this.sipHeader = sipHeader;
     }
 
-    public void setSIPMessage(SIPMessage sipMessage) {
+    public void setSIPMessage(SIPMessageInt sipMessage) {
         this.sipMessage = sipMessage;
     }
 }

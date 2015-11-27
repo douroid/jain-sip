@@ -41,7 +41,7 @@ import gov.nist.javax.sip.header.ContentLength;
 import gov.nist.javax.sip.header.ContentType;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.message.MessageFactoryImpl;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import io.netty.channel.ChannelHandlerContext;
@@ -133,7 +133,7 @@ public abstract class MessageChannel extends SimpleChannelInboundHandler<SipMess
      *
      * @param sipMessage Message to send.
      */
-    public abstract void sendMessage(SIPMessage sipMessage) throws IOException;
+    public abstract void sendMessage(SIPMessageInt sipMessage) throws IOException;
 
     /**
      * Get the peer address of the machine that sent us this message.
@@ -210,7 +210,7 @@ public abstract class MessageChannel extends SimpleChannelInboundHandler<SipMess
      * @param hop hop to send it to.
      * @throws IOException If there is an error sending the message
      */
-    public void sendMessage(final SIPMessage sipMessage, Hop hop) throws IOException {
+    public void sendMessage(final SIPMessageInt sipMessage, Hop hop) throws IOException {
         long time = System.currentTimeMillis();
         InetAddress hopAddr = InetAddress.getByName(hop.getHost());
 
@@ -228,7 +228,7 @@ public abstract class MessageChannel extends SimpleChannelInboundHandler<SipMess
 
                             public void run() {
                                 try {
-                                    ((RawMessageChannel) channel).processMessage((SIPMessage) sipMessage.clone());
+                                    ((RawMessageChannel) channel).processMessage((SIPMessageInt) sipMessage.clone());
                                 } catch (Exception ex) {
                                     if (logger.isLoggingEnabled(ServerLogger.TRACE_ERROR)) {
                                         logger.logError("Error self routing message cause by: ", ex);
@@ -277,7 +277,7 @@ public abstract class MessageChannel extends SimpleChannelInboundHandler<SipMess
      * @param receiverAddress is the address to which we want to send
      * @param receiverPort is the port to which we want to send
      */
-    public void sendMessage(SIPMessage sipMessage, InetAddress receiverAddress, int receiverPort)
+    public void sendMessage(SIPMessageInt sipMessage, InetAddress receiverAddress, int receiverPort)
             throws IOException {
         long time = System.currentTimeMillis();
         byte[] bytes = sipMessage.encodeAsBytes(this.getTransport());
@@ -314,7 +314,10 @@ public abstract class MessageChannel extends SimpleChannelInboundHandler<SipMess
      */
     public static String getKey(InetAddress inetAddr, int port, String transport) {
     	// http://java.net/jira/browse/JSIP-413 Concurrency issue within MessageChannel.java when using IPv6 addresses
-        return (transport + ":" + inetAddr.getHostAddress().replaceAll("[\\[\\]]", "") + ":" + port).toLowerCase();
+        StringBuilder msgKey = new StringBuilder(128);
+        String addr = inetAddr.getHostAddress();//.replaceAll("[\\[\\]]", "");
+        msgKey.append(transport).append(":").append(addr).append(":").append(port);
+        return msgKey.toString();
     }
 
     /**
@@ -326,8 +329,10 @@ public abstract class MessageChannel extends SimpleChannelInboundHandler<SipMess
     	if (ipAddress == null) {
     		ipAddress = hostPort.getHost().getHostname();
     	}
-    	return (transport + ":" + ipAddress.replaceAll("[\\[\\]]", "") + ":" + hostPort.getPort())
-    			.toLowerCase();
+        StringBuilder msgKey = new StringBuilder(128);
+        String addr = ipAddress;//.replaceAll("[\\[\\]]", "");
+        msgKey.append(transport).append(":").append(addr).append(":").append(hostPort.getPort());        
+    	return msgKey.toString();
     }
 
     /**
@@ -389,7 +394,7 @@ public abstract class MessageChannel extends SimpleChannelInboundHandler<SipMess
      * @param address is the inet address to which the message is sent.
      * @param port is the port to which the message is directed.
      */
-    public void logMessage(SIPMessage sipMessage, InetAddress address, int port, long time) {
+    public void logMessage(SIPMessageInt sipMessage, InetAddress address, int port, long time) {
         if (!logger.isLoggingEnabled(ServerLogger.TRACE_MESSAGES))
             return;
 

@@ -1,8 +1,9 @@
 /**
- * 
+ *
  */
 package io.pkts.packet.sip.impl;
 
+import gov.nist.javax.sip.header.SIPHeader;
 import io.pkts.buffer.Buffer;
 import io.pkts.buffer.Buffers;
 import io.pkts.packet.sip.SipMessage;
@@ -44,7 +45,7 @@ import javax.sip.header.Header;
 
 /**
  * @author jonas@jonasborjesson.com
- * 
+ *
  */
 public abstract class SipMessageImpl implements SipMessage {
 
@@ -82,7 +83,7 @@ public abstract class SipMessageImpl implements SipMessage {
     /**
      * Map with parsed headers. Need to change since there are many headers that
      * can appear multiple times. We'll get to that...
-     * 
+     *
      * We'll keep the default size of 16 and load factory of 0.75, which means
      * that we won't do a re-hash until we hit 12 headers. A basic request has
      * around 10ish headers but in real life there will be much more so get some
@@ -91,14 +92,11 @@ public abstract class SipMessageImpl implements SipMessage {
     private final Map<Buffer, List<SipHeader>> parsedHeaders = new LinkedHashMap<Buffer, List<SipHeader>>(16, 0.75f);
 
     /**
-     * 
-     * @param rawInitialBuffer
-     *            the raw initial line, which is either a request or a response
-     *            line (hopefully anyway, we won't know until we try!_
-     * @param headers
-     *            all the headers (un-parsed) of the SIP message
-     * @param payload
-     *            the payload or null if there is none
+     *
+     * @param rawInitialBuffer the raw initial line, which is either a request
+     * or a response line (hopefully anyway, we won't know until we try!_
+     * @param headers all the headers (un-parsed) of the SIP message
+     * @param payload the payload or null if there is none
      */
     public SipMessageImpl(final Buffer rawInitialBuffer, final Buffer headers, final Buffer payload) {
         this.rawInitialLine = rawInitialBuffer;
@@ -107,13 +105,11 @@ public abstract class SipMessageImpl implements SipMessage {
     }
 
     /**
-     * 
-     * @param initialLine
-     *            the initial line, which is either a request or a response line
-     * @param headers
-     *            all the headers (un-parsed) of the SIP message
-     * @param payload
-     *            the payload or null if there is none
+     *
+     * @param initialLine the initial line, which is either a request or a
+     * response line
+     * @param headers all the headers (un-parsed) of the SIP message
+     * @param payload the payload or null if there is none
      */
     public SipMessageImpl(final SipInitialLine initialLine, final Buffer headers, final Buffer payload) {
         this.initialLine = initialLine;
@@ -150,7 +146,7 @@ public abstract class SipMessageImpl implements SipMessage {
         return getInitialLineInternal().isRequestLine();
     }
 
-    private SipInitialLine getInitialLineInternal() {
+    public SipInitialLine getInitialLineInternal() {
         if (this.initialLine == null) {
             this.initialLine = SipInitialLine.parse(this.rawInitialLine);
         }
@@ -161,11 +157,11 @@ public abstract class SipMessageImpl implements SipMessage {
      * Since everything is done lazily, this method will parse and return the
      * initial line as a {@link SipRequestLine}. Only meant to be used by the
      * sub-classes.
-     * 
+     *
      * Of course, this method could throw both {@link ClassCastException} in
      * case this is actually a response and the parsing of the request line
      * could also fail.
-     * 
+     *
      * @return
      */
     protected SipRequestLine getRequestLine() throws SipParseException, ClassCastException {
@@ -175,7 +171,7 @@ public abstract class SipMessageImpl implements SipMessage {
     /**
      * Same as {@link #getRequestLine()} but for {@link SipResponseLine}
      * instead.
-     * 
+     *
      * @return
      * @throws SipParseException
      * @throws ClassCastException
@@ -189,10 +185,10 @@ public abstract class SipMessageImpl implements SipMessage {
     }
 
     /**
-     * 
+     *
      * @param headerName
-     * @param frame flag indicating whether or not we should make sure that the header has been
-     *        framed to its "real" type.
+     * @param frame flag indicating whether or not we should make sure that the
+     * header has been framed to its "real" type.
      * @return
      * @throws SipParseException
      */
@@ -276,7 +272,6 @@ public abstract class SipMessageImpl implements SipMessage {
         return header;
     }
 
-
     @Override
     public void addHeader(final SipHeader header) {
         internalAddHeader(header, false);
@@ -286,7 +281,7 @@ public abstract class SipMessageImpl implements SipMessage {
      * There are situations, such as when user does a
      * {@link #setHeader(SipHeader)}, where we must frame all headers, this
      * method does that.
-     * 
+     *
      * @throws SipParseException
      */
     private void frameAllHeaders() throws SipParseException {
@@ -335,7 +330,7 @@ public abstract class SipMessageImpl implements SipMessage {
     }
 
     /**
-     * 
+     *
      * {@inheritDoc}
      */
     @Override
@@ -692,7 +687,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     @Override
     public Buffer toBuffer() {
-        final Buffer buffer = Buffers.createBuffer(2048);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         getInitialLine().getBytes(buffer);
         buffer.write(SipParser.CR);
         buffer.write(SipParser.LF);
@@ -705,7 +700,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     /**
      * Helper method to clone all the headers into one continuous buffer.
-     * 
+     *
      * @return
      */
     protected Buffer cloneHeaders() {
@@ -720,7 +715,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     /**
      * Helper method to clone the payload.
-     * 
+     *
      * @return
      */
     protected Buffer clonePayload() {
@@ -733,7 +728,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     /**
      * Transfer the data of all headers into the supplied buffer.
-     * 
+     *
      * @param dst
      */
     protected void transferHeaders(final Buffer dst) {
@@ -753,11 +748,10 @@ public abstract class SipMessageImpl implements SipMessage {
     @Override
     public abstract SipMessage clone();
 
-   /* @Override
-    public Map<Buffer, List<SipHeader>> getHeaderMap(){
-        return this.parsedHeaders;
-    }*/
-    
+    /* @Override
+     public Map<Buffer, List<SipHeader>> getHeaderMap(){
+     return this.parsedHeaders;
+     }*/
     @Override
     public void addHeader(Header header) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -770,7 +764,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     @Override
     public void addFirst(Header header) throws SipException, NullPointerException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        addHeaderFirst((SipHeader) header);
     }
 
     @Override
@@ -795,7 +789,12 @@ public abstract class SipMessageImpl implements SipMessage {
 
     @Override
     public ListIterator getHeaders(String headerName) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        SipHeader headerInternal = this.getHeaderInternal(Buffers.wrap(headerName), true);
+        List<Header> list = new ArrayList();
+        if (headerInternal != null) {
+            list.add(headerInternal);
+        }
+        return list.listIterator();
     }
 
     @Override
@@ -805,7 +804,7 @@ public abstract class SipMessageImpl implements SipMessage {
 
     @Override
     public void setHeader(Header header) {
-        this.setHeader((SipHeader)header);
+        this.setHeader((SipHeader) header);
     }
 
     @Override
@@ -882,5 +881,5 @@ public abstract class SipMessageImpl implements SipMessage {
     public String getSIPVersion() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }

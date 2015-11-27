@@ -93,7 +93,7 @@ public class SipHeaderImpl implements SipHeader, javax.sip.header.Header {
 
     @Override
     public SipHeader clone() {
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         transferValue(buffer);
         return new SipHeaderImpl(this.name.clone(), buffer);
     }

@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package io.pkts.packet.sip.impl;
 
@@ -18,53 +18,44 @@ import io.pkts.packet.sip.header.SipHeader;
 import io.pkts.packet.sip.header.ToHeader;
 import io.pkts.packet.sip.header.ViaHeader;
 import java.text.ParseException;
-import java.util.ListIterator;
-import javax.sip.SipException;
-import javax.sip.header.ContentDispositionHeader;
-import javax.sip.header.ContentEncodingHeader;
-import javax.sip.header.ContentLanguageHeader;
-import javax.sip.header.ContentLengthHeader;
-import javax.sip.header.ContentTypeHeader;
-import javax.sip.header.ExpiresHeader;
-import javax.sip.header.Header;
 
 /**
  * @author jonas@jonasborjesson.com
- * 
+ *
  */
 public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
-    
+
     /**
      * Map of all known response codes to their default reason phrases.
      */
     private static final Buffer[] DEFAULT_RESPONSE_REASON = new Buffer[700];
-    
+
     /**
      * If the user creates a response that we do not recognize.
      */
     private static final Buffer UNKOWN_REASON = Buffers.wrap("Unknown");
-    
+
     static {
-        
+
         // 1xx—Provisional Responses
         DEFAULT_RESPONSE_REASON[100] = Buffers.wrap("Trying");
         DEFAULT_RESPONSE_REASON[180] = Buffers.wrap("Ringing");
         DEFAULT_RESPONSE_REASON[181] = Buffers.wrap("Call is Being Forwarded");
         DEFAULT_RESPONSE_REASON[182] = Buffers.wrap("Queued");
         DEFAULT_RESPONSE_REASON[199] = Buffers.wrap("Early Dialog Terminated");
-        
+
         // 2xx—Successful Responses
         DEFAULT_RESPONSE_REASON[200] = Buffers.wrap("OK");
         DEFAULT_RESPONSE_REASON[202] = Buffers.wrap("Accepted");
         DEFAULT_RESPONSE_REASON[204] = Buffers.wrap("No Notification");
-        
+
         // 3xx—Redirection Responses
         DEFAULT_RESPONSE_REASON[300] = Buffers.wrap("Multiple Choices");
         DEFAULT_RESPONSE_REASON[301] = Buffers.wrap("Moved Permanently");
         DEFAULT_RESPONSE_REASON[302] = Buffers.wrap("Moved Temporarily");
         DEFAULT_RESPONSE_REASON[305] = Buffers.wrap("Use Proxy");
         DEFAULT_RESPONSE_REASON[380] = Buffers.wrap("Alternative Service");
-        
+
         // 4xx—Client Failure Responses
         DEFAULT_RESPONSE_REASON[400] = Buffers.wrap("Bad Request");
         DEFAULT_RESPONSE_REASON[401] = Buffers.wrap("Unauthorized");
@@ -111,7 +102,7 @@ public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
         DEFAULT_RESPONSE_REASON[491] = Buffers.wrap("Request Pending");
         DEFAULT_RESPONSE_REASON[493] = Buffers.wrap("Undecipherable");
         DEFAULT_RESPONSE_REASON[494] = Buffers.wrap("Security Agreement Required");
-        
+
         // 5xx—Server Failure Responses
         DEFAULT_RESPONSE_REASON[500] = Buffers.wrap("Server Internal Error");
         DEFAULT_RESPONSE_REASON[501] = Buffers.wrap("Not Implemented");
@@ -121,17 +112,16 @@ public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
         DEFAULT_RESPONSE_REASON[505] = Buffers.wrap("Version Not Supported");
         DEFAULT_RESPONSE_REASON[513] = Buffers.wrap("Message Too Large");
         DEFAULT_RESPONSE_REASON[580] = Buffers.wrap("Precondition Failure");
-        
+
         // 6xx—Global Failure Responses
         DEFAULT_RESPONSE_REASON[600] = Buffers.wrap("Busy Everywhere");
         DEFAULT_RESPONSE_REASON[603] = Buffers.wrap("Decline");
         DEFAULT_RESPONSE_REASON[604] = Buffers.wrap("Does Not Exist Anywhere");
         DEFAULT_RESPONSE_REASON[606] = Buffers.wrap("Not Acceptable");
     }
-    
 
     /**
-     * 
+     *
      */
     public SipRequestImpl(final Buffer requestLine, final Buffer headers,
             final Buffer payload) {
@@ -139,7 +129,7 @@ public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
     }
 
     /**
-     * 
+     *
      */
     public SipRequestImpl(final SipRequestLine requestLine, final Buffer headers,
             final Buffer payload) {
@@ -176,11 +166,9 @@ public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
             return null;
         }
 
-
         final Buffer buffer = header.getValue();
         return RouteHeader.frame(buffer);
     }
-
 
     @Override
     public SipRequest toRequest() throws ClassCastException {
@@ -219,10 +207,9 @@ public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
 
         // The TimeStamp header should be there as well but screw it.
         // TODO: need to add any record-route headers
-
         return response;
     }
-    
+
     private Buffer getDefaultResponseReason(int statusCode) {
         final Buffer reason = DEFAULT_RESPONSE_REASON[statusCode];
         if (reason != null) {
@@ -231,9 +218,14 @@ public final class SipRequestImpl extends SipMessageImpl implements SipRequest {
         return UNKOWN_REASON.slice();
     }
 
+    private String method = null;
+
     @Override
     public String getMethod() {
-        return getMethodIO().toString();
+        if (method == null) {
+            method = getMethodIO().toString();
+        }
+        return method;
     }
 
     @Override

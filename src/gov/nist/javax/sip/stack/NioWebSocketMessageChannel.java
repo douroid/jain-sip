@@ -31,7 +31,7 @@ import gov.nist.core.HostPort;
 import gov.nist.core.LogWriter;
 import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.header.RecordRoute;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 
 import java.io.ByteArrayInputStream;
@@ -136,7 +136,7 @@ public class NioWebSocketMessageChannel extends NioTcpMessageChannel{
 	}
 
 	@Override
-	public void sendMessage(SIPMessage sipMessage, InetAddress receiverAddress, int receiverPort)
+	public void sendMessage(SIPMessageInt sipMessage, InetAddress receiverAddress, int receiverPort)
             throws IOException {
 		if(sipMessage instanceof SIPRequest) {
 			if(client && !httpClientRequestSent) {
@@ -244,7 +244,7 @@ public class NioWebSocketMessageChannel extends NioTcpMessageChannel{
      * @throws Exception 
      */
 	@Override
-    public void processMessage(SIPMessage message) throws Exception {
+    public void processMessage(SIPMessageInt message) throws Exception {
     	if(message instanceof Request) {
     		// Commented out for https://java.net/jira/browse/JSIP-504 Contribution by Michael Groshans
 //    		Request request = (Request) message;

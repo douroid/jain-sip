@@ -37,6 +37,7 @@ import java.text.ParseException;
 import javax.sip.InvalidArgumentException;
 import java.util.*;
 import gov.nist.javax.sip.address.*;
+import io.pkts.packet.sip.header.impl.RouteHeaderImpl;
 
 /*
 * This file contains enhancements contributed by Alexandre Silva Santos
@@ -891,8 +892,7 @@ public class HeaderFactoryImpl implements HeaderFactory , HeaderFactoryExt {
     public RouteHeader createRouteHeader(Address address) {
         if (address == null)
             throw new NullPointerException("null address arg");
-        Route route = new Route();
-        route.setAddress(address);
+        RouteHeaderImpl route = new RouteHeaderImpl((io.pkts.packet.sip.address.Address) address,null);
 
         return route;
     }

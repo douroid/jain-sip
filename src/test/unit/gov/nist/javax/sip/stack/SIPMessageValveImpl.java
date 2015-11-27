@@ -1,6 +1,6 @@
 package test.unit.gov.nist.javax.sip.stack;
 import gov.nist.javax.sip.SipStackImpl;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.stack.MessageChannel;
 import gov.nist.javax.sip.stack.SIPMessageValve;
@@ -32,11 +32,11 @@ import javax.sip.message.Response;
     	 * @param code
     	 * @return
     	 */
-    	public SIPMessage createErrorResponse(SIPRequest request, int code) {
+    	public SIPMessageInt createErrorResponse(SIPRequest request, int code) {
     		return request.createResponse(code);
     	}
     	
-    	public void sendResponse(MessageChannel channel, SIPMessage response) throws IOException {
+    	public void sendResponse(MessageChannel channel, SIPMessageInt response) throws IOException {
     		channel.sendMessage(response);
     	}
 

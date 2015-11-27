@@ -34,7 +34,7 @@ import gov.nist.javax.sip.*;
 import gov.nist.javax.sip.header.Event;
 import gov.nist.javax.sip.header.extensions.JoinHeader;
 import gov.nist.javax.sip.header.extensions.ReplacesHeader;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.parser.MessageParserFactory;
@@ -1178,7 +1178,7 @@ public abstract class SIPTransactionStack implements
      * @return the transaction object corresponding to the request or null if no
      *         such mapping exists.
      */
-    public SIPTransaction findTransaction(SIPMessage sipMessage,
+    public SIPTransaction findTransaction(SIPMessageInt sipMessage,
             boolean isServer) {
         SIPTransaction retval = null;
         try {

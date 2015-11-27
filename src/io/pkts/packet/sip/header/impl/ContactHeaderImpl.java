@@ -27,7 +27,7 @@ public class ContactHeaderImpl extends AddressParametersHeaderImpl implements Co
 
     @Override
     public ContactHeader clone() {
-        final Buffer buffer = Buffers.createBuffer(1024);
+        final Buffer buffer = Buffers.createBuffer(DEFAULT_BUFFER_SIZE);
         transferValue(buffer);
         try {
             return ContactHeader.frame(buffer);

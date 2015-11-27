@@ -45,7 +45,7 @@ import gov.nist.javax.sip.header.RouteList;
 import gov.nist.javax.sip.header.TimeStamp;
 import gov.nist.javax.sip.header.To;
 import gov.nist.javax.sip.header.Via;
-import gov.nist.javax.sip.message.SIPMessage;
+import gov.nist.javax.sip.message.SIPMessageInt;
 import gov.nist.javax.sip.message.SIPRequest;
 import gov.nist.javax.sip.message.SIPResponse;
 import gov.nist.javax.sip.stack.IllegalTransactionStateException.Reason;
@@ -343,7 +343,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
    * @see gov.nist.javax.sip.stack.SIPClientTransaction#isMessagePartOfTransaction(gov.nist.javax.sip.message.SIPMessage)
    */
   @Override
-  public boolean isMessagePartOfTransaction(SIPMessage messageToTest) {
+  public boolean isMessagePartOfTransaction(SIPMessageInt messageToTest) {
 
     // List of Via headers in the message to test
     ViaHeader topMostViaHeader = messageToTest.getTopmostVia();
@@ -395,7 +395,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
    * @see gov.nist.javax.sip.stack.SIPClientTransaction#sendMessage(gov.nist.javax.sip.message.SIPMessage)
    */
   @Override
-  public void sendMessage(SIPMessage messageToSend) throws IOException {
+  public void sendMessage(SIPMessageInt messageToSend) throws IOException {
 
     try {
       // Message typecast as a request
