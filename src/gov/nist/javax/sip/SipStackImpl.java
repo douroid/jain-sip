@@ -481,6 +481,11 @@ import javax.sip.message.Request;
  * to see if that response suffix is present. If it is not present, then the
  * stack will silently drop the response.</li>
  * 
+ * <li><b>gov.nist.javax.sip.BRANCH_CASE_SENSITIVE = [true|false] </b> Default
+ * is <it>false</it> A flag that manage whether the branchId in Via headers should
+ * use case sensitive matching or not. False value complies with RFC 3261.
+ * If set to true, performance gains are expected.</li>  
+ * 
  * <li><b>gov.nist.javax.sip.MAX_FORK_TIME_SECONDS = integer </b> Maximum time for which the original 
  * transaction for which a forked response is received is tracked. This property
  * is only relevant to Dialog Stateful applications ( User Agents or B2BUA).
@@ -718,6 +723,10 @@ public class SipStackImpl extends SIPTransactionStack implements
 		this();
 		configurationProperties = new MergedSystemProperties(configurationProperties);
 		this.configurationProperties = configurationProperties;
+                
+                String caseSensitiveStr = configurationProperties.getProperty("gov.nist.javax.sip.BRANCH_CASE_SENSITIVE");
+                this.branchCaseSensitiveMatching = Boolean.valueOf(caseSensitiveStr);
+                
 		String address = configurationProperties
 				.getProperty("javax.sip.IP_ADDRESS");
 		try {
@@ -1952,6 +1961,6 @@ public class SipStackImpl extends SIPTransactionStack implements
 	}
 
 
-    
+
 
 }

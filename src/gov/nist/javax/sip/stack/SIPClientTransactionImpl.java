@@ -350,10 +350,8 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
     String messageBranch = topMostViaHeader.getBranch();
     boolean rfc3261Compliant = getBranch() != null
                                && messageBranch != null
-                               && getBranch().toLowerCase()
-                                             .startsWith(SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE)
-                               && messageBranch.toLowerCase()
-                                               .startsWith(SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE);
+                               && sipStack.isMagicCookieBranch(getBranch())
+                               && sipStack.isMagicCookieBranch(messageBranch);
 
     transactionMatches = false;
     if (TransactionState._COMPLETED == this.getInternalState()) {
@@ -361,7 +359,7 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
         transactionMatches = getBranch().equalsIgnoreCase(topMostViaHeader.getBranch())
                              && getMethod().equals(messageToTest.getCSeq().getMethod());
       } else {
-        transactionMatches = getBranch().equals(messageToTest.getTransactionId());
+        transactionMatches = getBranch().equals(sipStack.computeTransactionId(messageToTest));
       }
     } else if (!isTerminated()) {
       if (rfc3261Compliant) {
@@ -376,10 +374,10 @@ public class SIPClientTransactionImpl extends SIPTransactionImpl implements SIPC
       } else {
         // not RFC 3261 compliant.
         if (getBranch() != null) {
-          transactionMatches = getBranch().equalsIgnoreCase(messageToTest.getTransactionId());
+          transactionMatches = getBranch().equalsIgnoreCase(sipStack.computeTransactionId(messageToTest));
         } else {
-          transactionMatches = ((SIPRequest) getRequest()).getTransactionId()
-                                                          .equalsIgnoreCase(messageToTest.getTransactionId());
+          transactionMatches = sipStack.computeTransactionId((SIPRequest) getRequest())
+                                                          .equalsIgnoreCase(sipStack.computeTransactionId(messageToTest));
         }
 
       }

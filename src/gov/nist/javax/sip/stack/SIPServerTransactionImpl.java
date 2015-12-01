@@ -571,8 +571,7 @@ public class SIPServerTransactionImpl extends SIPTransactionImpl implements SIPS
 
                     // If the branch parameter exists but
                     // does not start with the magic cookie,
-                    if (!messageBranch.toLowerCase().startsWith(
-                            SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE)) {
+                    if (!sipStack.isMagicCookieBranch(messageBranch)) {
 
                         // Flags this as old
                         // (RFC2543-compatible) client

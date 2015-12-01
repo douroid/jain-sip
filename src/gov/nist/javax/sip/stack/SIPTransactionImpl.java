@@ -370,9 +370,9 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
         // Branch value of topmost Via header
         String newBranch;
 
-        final String newTransactionId = newOriginalRequest.getTransactionId();
+        final String newTransactionId = sipStack.computeTransactionId(newOriginalRequest);
         if (this.originalRequest != null
-                && (!this.originalRequest.getTransactionId().equals(
+                && (!sipStack.computeTransactionId(originalRequest).equals(
                         newTransactionId))) {
             sipStack.removeTransactionHash(this);
         }
@@ -1082,7 +1082,7 @@ public abstract class SIPTransactionImpl implements SIPTransaction {
 
                 // If the branch parameter exists but
                 // does not start with the magic cookie,
-                if (!messageBranch.toLowerCase().startsWith(SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE)) {
+                if (!sipStack.isMagicCookieBranch(messageBranch)) {
 
                     // Flags this as old
                     // (RFC2543-compatible) client

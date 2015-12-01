@@ -309,8 +309,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
        * results in a clash. If so reject the request.
        */
       if (sipRequest.getTopmostVia().getBranch() != null
-        && sipRequest.getTopmostVia().getBranch().startsWith(
-                                                             SIPConstants.BRANCH_MAGIC_COOKIE)
+        && sipStack.isMagicCookieBranch(sipRequest.getTopmostVia().getBranch())
                                                              && sipStack.findTransaction((SIPRequest) sipRequest, false) != null) {
         throw new TransactionUnavailableException(
                                                   "Transaction already exists!");
@@ -369,8 +368,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
         // been requested, set the branch ID.
         String branchId = null;
         if (sipRequest.getTopmostVia().getBranch() == null
-          || !sipRequest.getTopmostVia().getBranch().startsWith(
-                                                                SIPConstants.BRANCH_MAGIC_COOKIE)
+          || !sipStack.isMagicCookieBranch(sipRequest.getTopmostVia().getBranch())
                                                                 || sipStack.checkBranchId() ) {
           branchId = Utils.getInstance().generateBranchId();
           
@@ -712,7 +710,7 @@ public class SipProviderImpl implements javax.sip.SipProvider, gov.nist.javax.si
                 Via via = sipRequest.getTopmostVia();
                 String branch = via.getBranch();
                 if (branch == null || branch.length() == 0) {
-                    via.setBranch(sipRequest.getTransactionId());
+                    via.setBranch(sipStack.computeTransactionId(sipRequest));
                 }
             }
             MessageChannel messageChannel = null;

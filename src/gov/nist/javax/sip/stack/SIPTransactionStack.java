@@ -32,6 +32,7 @@ import gov.nist.core.net.NetworkLayer;
 import gov.nist.core.net.SecurityManagerProvider;
 import gov.nist.javax.sip.*;
 import gov.nist.javax.sip.header.Event;
+import gov.nist.javax.sip.header.From;
 import gov.nist.javax.sip.header.Via;
 import gov.nist.javax.sip.header.extensions.JoinHeader;
 import gov.nist.javax.sip.header.extensions.ReplacesHeader;
@@ -78,6 +79,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class SIPTransactionStack implements
         SIPTransactionEventListener, SIPDialogEventListener {
 	private static StackLogger logger = CommonLogger.getLogger(SIPTransactionStack.class);
+        
+        
+    /**
+     * Specifiy whether branch ids in Via headers use case sensitive matching or
+     * not.
+     */
+     protected boolean branchCaseSensitiveMatching = true;
+     
     /*
      * Number of milliseconds between timer ticks (500).
      */
@@ -1185,7 +1194,7 @@ public abstract class SIPTransactionStack implements
             if (isServer) {
                 Via via = sipMessage.getTopmostVia();
                 if (via.getBranch() != null) {
-                    String key = sipMessage.getTransactionId();
+                    String key = computeTransactionId(sipMessage);
 
                     retval = (SIPTransaction) serverTransactionTable.get(key);
                     if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
@@ -1194,8 +1203,7 @@ public abstract class SIPTransactionStack implements
                                         "serverTx: looking for key " + key
                                                 + " existing="
                                 + serverTransactionTable);
-                    if (key
-                            .startsWith(SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE)) {
+                    if (isMagicCookieBranch(key)) {
                         return retval;
                     }
 
@@ -1217,13 +1225,12 @@ public abstract class SIPTransactionStack implements
             } else {
                 Via via = sipMessage.getTopmostVia();
                 if (via.getBranch() != null) {
-                    String key = sipMessage.getTransactionId();
+                    String key = computeTransactionId(sipMessage);
                     if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
                         logger.logDebug(
                                 "clientTx: looking for key " + key);
                     retval = (SIPTransaction) clientTransactionTable.get(key);
-                    if (key
-                            .startsWith(SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE)) {
+                    if (isMagicCookieBranch(key)) {
                         return retval;
                     }
 
@@ -1470,7 +1477,7 @@ public abstract class SIPTransactionStack implements
         // Next transaction in the set
         SIPServerTransaction nextTransaction;
 
-        final String key = requestReceived.getTransactionId();
+        final String key = computeTransactionId(requestReceived);
 
         requestReceived.setMessageChannel(requestMessageChannel);
 
@@ -1507,8 +1514,7 @@ public abstract class SIPTransactionStack implements
 
             // Loop through all server transactions
             currentTransaction = null;
-            if (!key.toLowerCase().startsWith(
-                    SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE)) {
+            if (!isMagicCookieBranch(key)) {
                 Iterator<SIPServerTransaction> transactionIterator = serverTransactionTable.values().iterator();
                 while (transactionIterator.hasNext()
                         && currentTransaction == null) {
@@ -1635,7 +1641,7 @@ public abstract class SIPTransactionStack implements
         	}
         }
 
-        String key = responseReceived.getTransactionId();
+        String key = computeTransactionId(responseReceived);
 
         // Note that for RFC 3261 compliant operation, this lookup will
         // return a tx if one exists and hence no need to search through
@@ -1644,8 +1650,8 @@ public abstract class SIPTransactionStack implements
 
         if (currentTransaction == null
                 || (!currentTransaction
-                        .isMessagePartOfTransaction(responseReceived) && !key
-                        .startsWith(SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE))) {
+                        .isMessagePartOfTransaction(responseReceived) && !isMagicCookieBranch(key)
+                )) {
             // Loop through all client transactions
 
             transactionIterator = clientTransactionTable.values().iterator();
@@ -1964,7 +1970,7 @@ public abstract class SIPTransactionStack implements
             } else {
                 this.activeClientTransactionCount.incrementAndGet();
             }
-            String key = sipRequest.getTransactionId();
+            String key = computeTransactionId(sipRequest);
             existingTx = clientTransactionTable.putIfAbsent(key,
                     (SIPClientTransaction) sipTransaction);
             
@@ -1973,7 +1979,7 @@ public abstract class SIPTransactionStack implements
                         .logDebug(" putTransactionHash : " + " key = " + key);
             }
         } else {
-            String key = sipRequest.getTransactionId();
+            String key = computeTransactionId(sipRequest);
 
             if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
                 logger
@@ -3346,4 +3352,86 @@ public abstract class SIPTransactionStack implements
 	public void setSslRenegotiationEnabled(boolean sslRenegotiationEnabled) {
 		this.sslRenegotiationEnabled = sslRenegotiationEnabled;
 	}
+        
+    public boolean isMagicCookieBranch(String branchValue) {
+        if (branchCaseSensitiveMatching) {
+            String branchLower = branchValue.toLowerCase();
+            return branchLower.startsWith(SIPConstants.BRANCH_MAGIC_COOKIE_LOWER_CASE);
+        } else {
+            return branchValue.startsWith(SIPConstants.BRANCH_MAGIC_COOKIE);
+        }
+    }
+    
+    /**
+     * Generate (compute) a transaction ID for this SIP message.
+     *
+     * @return A string containing the concatenation of various portions of the From,To,Via and
+     *         RequestURI portions of this message as specified in RFC 2543: All responses to a
+     *         request contain the same values in the Call-ID, CSeq, To, and From fields (with the
+     *         possible addition of a tag in the To field (section 10.43)). This allows responses
+     *         to be matched with requests. Incorporates a bug fix for a bug sent in by Gordon
+     *         Ledgard of IPera for generating transactionIDs when no port is present in the via
+     *         header. Incorporates a bug fix for a bug report sent in by Chris Mills of Nortel
+     *         Networks (converts to lower case when returning the transaction identifier).
+     *
+     * @return a string that can be used as a transaction identifier for this message. This can be
+     *         used for matching responses and requests (i.e. an outgoing request and its matching
+     *         response have the same computed transaction identifier).
+     */
+    public String computeTransactionId(SIPRequest request) {
+        String txId = null;
+        
+        Via topVia = request.getTopmostVia();
+//        if (!this.getViaHeaders().isEmpty()) {
+//            topVia = (Via) this.getViaHeaders().getFirst();
+//        }
+        // Have specified a branch Identifier so we can use it to identify
+        // the transaction. BranchId is not case sensitive.
+        // Branch Id prefix is not case sensitive.
+        if (topVia != null
+                && topVia.getBranch() != null
+                && topVia.getBranch().toUpperCase().startsWith(
+                        SIPConstants.BRANCH_MAGIC_COOKIE_UPPER_CASE)) {
+            // Bis 09 compatible branch assignment algorithm.
+            // implies that the branch id can be used as a transaction
+            // identifier.
+            if (request.getCSeq().getMethod().equals(Request.CANCEL))
+                txId = (topVia.getBranch() + ":" + request.getCSeq().getMethod());
+            else
+                txId = topVia.getBranch();
+        } else {
+            // Old style client so construct the transaction identifier
+            // from various fields of the request.
+            StringBuilder retval = new StringBuilder();
+            From from = (From) request.getFrom();
+
+            // String hpFrom = from.getUserAtHostPort();
+            // retval.append(hpFrom).append(":");
+            if (from.hasTag())
+                retval.append(from.getTag()).append("-");
+            // String hpTo = to.getUserAtHostPort();
+            // retval.append(hpTo).append(":");
+            String cid = request.getCallIdHeader().getCallId();
+            retval.append(cid).append("-");
+            retval.append(request.getCSeq().getSeqNumber()).append("-").append(
+                    request.getCSeq().getMethod());
+            if (topVia != null) {
+                retval.append("-").append(topVia.getSentBy().encode());
+                if (!topVia.getSentBy().hasPort()) {
+                    retval.append("-").append(5060);
+                }
+            }
+            if (request.getCSeq().getMethod().equals(Request.CANCEL)) {
+                retval.append(Request.CANCEL);
+            }
+            txId = retval.toString().replace(":", "-").replace("@", "-")
+                    + Utils.getSignature();
+        }
+        if (!branchCaseSensitiveMatching) 
+        {
+            txId = txId.toLowerCase();
+        }
+        return txId;
+    }
+    
 }
