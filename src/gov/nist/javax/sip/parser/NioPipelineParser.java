@@ -41,10 +41,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.Semaphore;
 
 import javax.sip.header.CallIdHeader;
 import javax.sip.header.ContentLengthHeader;
@@ -75,6 +71,7 @@ public class NioPipelineParser {
     private int sizeCounter;
     private SIPTransactionStack sipStack;
     private MessageParser smp = null;
+
     boolean isRunning = false;
 	boolean currentStreamEnded = false;
 	boolean readingMessageBodyContents = false;
@@ -83,32 +80,7 @@ public class NioPipelineParser {
 	String partialLine = "";
 	String callId;
 	
-	private ConcurrentHashMap<String, CallIDOrderingStructure> messagesOrderingMap = new ConcurrentHashMap<String, CallIDOrderingStructure>();
-	   
-	class CallIDOrderingStructure {
-        private Semaphore semaphore;
-        private Queue<UnparsedMessage> messagesForCallID;
-        
-        public CallIDOrderingStructure() {
-            semaphore = new Semaphore(1, true);
-            messagesForCallID = new ConcurrentLinkedQueue<UnparsedMessage>();
-        }        
 
-        /**
-         * @return the semaphore
-         */
-        public Semaphore getSemaphore() {
-            return semaphore;
-        }
-       
-        /**
-         * @return the messagesForCallID
-         */
-        public Queue<UnparsedMessage> getMessagesForCallID() {
-            return messagesForCallID;
-        }
-    }
-	
 	public static class UnparsedMessage {
 		String lines;
 		byte[] body;
@@ -123,83 +95,63 @@ public class NioPipelineParser {
 	}
 	
     public class Dispatch implements Runnable, QueuedMessageDispatchBase{
-    	CallIDOrderingStructure callIDOrderingStructure;
     	String callId;
+        UnparsedMessage unparsedMessage;
     	long time;
-    	public Dispatch(CallIDOrderingStructure callIDOrderingStructure, String callId) {
-    		this.callIDOrderingStructure = callIDOrderingStructure;
+    	public Dispatch(UnparsedMessage unparsedMsg, String callId) {
+    		this.unparsedMessage = unparsedMsg;
     		this.callId = callId;
     		time = System.currentTimeMillis();
     	}
         public void run() {   
-        	
-            // we acquire it in the thread to avoid blocking other messages with a different call id
-            // that could be processed in parallel                                    
-            Semaphore semaphore = callIDOrderingStructure.getSemaphore();
-            final Queue<UnparsedMessage> messagesForCallID = callIDOrderingStructure.getMessagesForCallID();
-            try {                                                                                
-                semaphore.acquire();  
-                if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
-                	logger.logDebug("semaphore acquired for message " + callId);
-                }
-            } catch (InterruptedException e) {
-                logger.logError("Semaphore acquisition for callId " + callId + " interrupted", e);
-            }
+            logger.logInfo("serving msg on call id " + callId);
             SIPMessage parsedSIPMessage = null;
-            synchronized(smp) {
-				UnparsedMessage unparsedMessage = messagesForCallID.peek();
-				if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
-                	logger.logDebug( "\nUnparsed message before parser is:\n" + unparsedMessage);
-                }
-				try {
-					parsedSIPMessage = smp.parseSIPMessage(unparsedMessage.lines.getBytes(), false, false, null);
-					if(unparsedMessage.body.length > 0) {
-						parsedSIPMessage.setMessageContent(unparsedMessage.body);
-					}
-				} catch (ParseException e) {
-					logger.logError("Problem parsing message " + unparsedMessage);
-					messagesForCallID.poll(); // move on to the next one
-					return;
-				}
-			}
-            if(sipStack.sipEventInterceptor != null) {
-            	sipStack.sipEventInterceptor.beforeMessage(parsedSIPMessage);
-            }
-            
-            // once acquired we get the first message to process
-            messagesForCallID.poll();
-            SIPMessage message = parsedSIPMessage;
-            
-            
             try {
-                sipMessageListener.processMessage(message);
-            } catch (Exception e) {
-            	logger.logError("Error occured processing message " + message, e);    
+
+            		if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
+            			logger.logDebug( "\nUnparsed message before parser is:\n" + unparsedMessage);
+            		}
+        			parsedSIPMessage = smp.parseSIPMessage(unparsedMessage.lines.getBytes(), false, false, null);        		
+        			if(parsedSIPMessage == null) {
+        				// https://java.net/jira/browse/JSIP-503
+        				if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
+                			logger.logDebug( "parsed message is null, probably because of end of stream, empty packets or socket closed "
+                					+ "and we got CRLF to terminate cleanly, not processing message");
+                		}
+        			} else if(unparsedMessage.body.length > 0) {
+        				parsedSIPMessage.setMessageContent(unparsedMessage.body);
+        			}
+
+            	if(sipStack.sipEventInterceptor != null
+            			// https://java.net/jira/browse/JSIP-503
+                		&& parsedSIPMessage != null) {
+            		sipStack.sipEventInterceptor.beforeMessage(parsedSIPMessage);
+            	}
+
+            	if(parsedSIPMessage != null) { // https://java.net/jira/browse/JSIP-503
+            		sipMessageListener.processMessage(parsedSIPMessage);
+            	}
+            } catch (ParseException e) {
+            	// https://java.net/jira/browse/JSIP-499 move the ParseException here so the finally block 
+            	// is called, the semaphore released and map cleaned up if need be
+            	if (logger.isLoggingEnabled(StackLogger.TRACE_WARN)) {
+            		logger.logWarning("Problem parsing message " + unparsedMessage);
+            	}
+    		}catch (Exception e) {
+            	logger.logError("Error occured processing message " + message, e);
                 // We do not break the TCP connection because other calls use the same socket here
-            } finally {                                        
-                if(messagesForCallID.size() <= 0) {
-                    messagesOrderingMap.remove(callId);
-                    if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
-                    	logger.logDebug("CallIDOrderingStructure removed for message " + callId);
-                    }
-                }
+            } finally {            
                 if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
-                	logger.logDebug("releasing semaphore for message " + message);
+                	logger.logDebug("releasing semaphore for message " + parsedSIPMessage);
                 }
-                //release the semaphore so that another thread can process another message from the call id queue in the correct order
-                // or a new message from another call id queue
-                semaphore.release(); 
-                if(messagesOrderingMap.isEmpty()) {
-                    synchronized (messagesOrderingMap) {
-                        messagesOrderingMap.notify();
-                    }
-                }
-                if(sipStack.sipEventInterceptor != null) {
-                	sipStack.sipEventInterceptor.afterMessage(message);
+                if(sipStack.sipEventInterceptor != null
+                		// https://java.net/jira/browse/JSIP-503
+                		&& parsedSIPMessage != null) {
+                	sipStack.sipEventInterceptor.afterMessage(parsedSIPMessage);
                 }
             }
             if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
-            	logger.logDebug("dispatch task done on " + message);
+            	logger.logDebug("dispatch task done on " + parsedSIPMessage);
             }
         }
 		public long getReceptionTime() {
@@ -326,35 +278,18 @@ public class NioPipelineParser {
 					// NIO Message with no Call-ID throws NPE
 					throw new IOException("received message with no Call-ID");
 				}
-                // http://dmy999.com/article/34/correct-use-of-concurrenthashmap
-                CallIDOrderingStructure orderingStructure = messagesOrderingMap.get(callId);
-                if(orderingStructure == null) {
-                    CallIDOrderingStructure newCallIDOrderingStructure = new CallIDOrderingStructure();
-                    orderingStructure = messagesOrderingMap.putIfAbsent(callId, newCallIDOrderingStructure);
-                    if(orderingStructure == null) {
-                        orderingStructure = newCallIDOrderingStructure;       
-                        if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
-                            logger.logDebug("new CallIDOrderingStructure added for message " + message);
-                        }
-                    }
-                }
-                final CallIDOrderingStructure callIDOrderingStructure = orderingStructure;                                 
-                // we add the message to the pending queue of messages to be processed for that call id here 
-                // to avoid blocking other messages with a different call id
-                // that could be processed in parallel
-                callIDOrderingStructure.getMessagesForCallID().offer(new UnparsedMessage(msgLines, msgBodyBytes));                                                                                   
-                
-                PostParseExecutorServices.getPostParseExecutor().execute(new Dispatch(callIDOrderingStructure, callId)); // run in executor thread
+                                                                                
+                PostParseExecutorServices.getAffinityPostParseExecutor(callId).execute(new Dispatch(new UnparsedMessage(msgLines, msgBodyBytes), callId)); // run in executor thread
 			} else {
 				SIPMessage sipMessage = null;
-				synchronized(smp) {
+				
 					try {
 						sipMessage = smp.parseSIPMessage(msgLines.getBytes(), false, false, null);
 						sipMessage.setMessageContent(msgBodyBytes);
 					} catch (ParseException e) {
 						logger.logError("Parsing problem", e);
 					}
-				}
+				
 				this.contentLength = 0;
 				processSIPMessage(sipMessage);
 			}
