@@ -79,20 +79,25 @@ public class NioTcpMessageProcessor extends ConnectionOrientedMessageProcessor {
     	}
     }
     
-	public void assignChannelToDestination(HostPort targetHostPort, NioTcpMessageChannel channel) {
-		String key = MessageChannel.getKey(targetHostPort, transport);
-		this.messageChannels.put(key, channel);
-	}
+//  Commented out as part of https://java.net/jira/browse/JSIP-504
+//	public void assignChannelToDestination(HostPort targetHostPort, NioTcpMessageChannel channel) {
+//		String key = MessageChannel.getKey(targetHostPort, transport);
+//		this.messageChannels.put(key, channel);
+//	}
     
-    private SocketChannel initiateConnection(InetSocketAddress address, int timeout) throws IOException {
+    private SocketChannel initiateConnection(InetSocketAddress address, InetAddress myAddress) throws IOException {
     	
     	// We use blocking outbound connect just because it's pure pain to deal with http://stackoverflow.com/questions/204186/java-nio-select-returns-without-selected-keys-why
         SocketChannel socketChannel = SocketChannel.open();
+        if (myAddress != null) {
+        	// https://java.net/jira/browse/JSIP-501 bind to the right local address
+        	socketChannel.socket().bind(new InetSocketAddress(myAddress, 0));
+        }
         socketChannel.configureBlocking(true);
       
         if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
         	logger.logDebug("Init connect " + address);
-        socketChannel.socket().connect(address, timeout);
+        socketChannel.socket().connect(address, 8000);
         socketChannel.configureBlocking(false);
         if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
         	logger.logDebug("Blocking set to false now " + address);
@@ -104,8 +109,8 @@ public class NioTcpMessageProcessor extends ConnectionOrientedMessageProcessor {
         return socketChannel;
     }
 
-    public SocketChannel blockingConnect(InetSocketAddress address, int timeout) throws IOException {
-    	return initiateConnection(address, timeout);
+    public SocketChannel blockingConnect(InetSocketAddress address, InetAddress localAddress) throws IOException {
+    	return initiateConnection(address, localAddress);
     }
         
     public void send(SocketChannel socket, byte[] data)  {
@@ -145,6 +150,8 @@ public class NioTcpMessageProcessor extends ConnectionOrientedMessageProcessor {
             	if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
             		logger.logDebug("Dead socketChannel" + socketChannel + " socket " + socketChannel.socket().getInetAddress() + ":"+socketChannel.socket().getPort());
             	selectionKey.cancel();
+            	// https://java.net/jira/browse/JSIP-475 remove the socket from the hashmap
+            	pendingData.remove(socketChannel);
             	return;
             }
             
@@ -162,6 +169,8 @@ public class NioTcpMessageProcessor extends ConnectionOrientedMessageProcessor {
             	if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
             		logger.logDebug("Dead socketChannel" + socketChannel + " socket " + socketChannel.socket().getInetAddress() + ":"+socketChannel.socket().getPort());
             	selectionKey.cancel();
+            	// https://java.net/jira/browse/JSIP-475 remove the socket from the hashmap
+            	pendingData.remove(socketChannel);
             	return;
             }
           	
@@ -179,6 +188,9 @@ public class NioTcpMessageProcessor extends ConnectionOrientedMessageProcessor {
 		            		logger.logDebug("Dead socketChannel" + socketChannel + " socket " + socketChannel.socket().getInetAddress() + ":"+socketChannel.socket().getPort() + " : error message " + e.getMessage());
 						nioTcpMessageChannel.close();
 						// Shall we perform a retry mechanism in case the remote host connection was closed due to a TCP RST ?
+						// https://java.net/jira/browse/JSIP-475 in the meanwhile remove the data from the hashmap
+						queue.remove(0); 
+						pendingData.remove(socketChannel);
 						return;
 					}
 
@@ -428,6 +440,17 @@ public class NioTcpMessageProcessor extends ConnectionOrientedMessageProcessor {
 
     }
 
+    // https://java.net/jira/browse/JSIP-475
+    @Override
+    protected synchronized void remove(
+    		ConnectionOrientedMessageChannel messageChannel) {
+    	if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+            logger.logDebug(Thread.currentThread() + " removing " + ((NioTcpMessageChannel)messageChannel).getSocketChannel() + " from processor " + getIpAddress()+ ":" + getPort() + "/" + getTransport());
+        }
+    	pendingData.remove(((NioTcpMessageChannel)messageChannel).getSocketChannel());
+    	super.remove(messageChannel);
+    }
+    
     @Override
     public int getDefaultTargetPort() {
         return 5060;

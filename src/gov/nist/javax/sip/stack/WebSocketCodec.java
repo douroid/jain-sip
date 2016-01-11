@@ -62,6 +62,8 @@ public class WebSocketCodec {
 	private byte[] maskingKey = new byte[4];
 	private final boolean allowExtensions;
 	private final boolean maskedPayload;
+	private boolean closeOpcodeReceived;
+
 	
 	// THe payload inside the websocket frame starts at this index
 	private int payloadStartIndex = -1;
@@ -115,6 +117,13 @@ public class WebSocketCodec {
 		if(logger.isLoggingEnabled(LogLevels.TRACE_DEBUG)) {
 			logger.logDebug("Decoding WebSocket Frame opCode=" + frameOpcode);
 		}
+		
+		
+		if(frameOpcode == 8) {
+			//https://code.google.com/p/chromium/issues/detail?id=388243#c15
+			this.closeOpcodeReceived = true;
+		}
+
 
 		// MASK, PAYLOAD LEN 1
 		b = readNextByte();
@@ -164,7 +173,7 @@ public class WebSocketCodec {
 			}
 
 			// Analyze the mask
-			if (maskedPayload) {
+			if (frameMasked) {
 				for(int q=0; q<4 ;q++)
 					maskingKey[q] = readNextByte();
 			}
@@ -187,7 +196,7 @@ public class WebSocketCodec {
 		}
 
 		// Unmask data if needed and only if the condition above is true
-		if (maskedPayload) {
+		if (frameMasked) {
 			unmask(buffer, payloadStartIndex, (int) (payloadStartIndex + framePayloadLength));
 		}
 
@@ -208,15 +217,14 @@ public class WebSocketCodec {
 		// All done, we are ready to be called again
 		return plainTextBytes;
 	}
+	
+	protected static byte[] encode(byte[] msg, int rsv, boolean fin, boolean maskPayload) throws Exception {
+		return encode(msg, rsv, fin, maskPayload, OPCODE_TEXT);
+	}
 
-	protected static byte[] encode(byte[] msg, int rsv, boolean fin) throws Exception {
 
-		boolean maskPayload = false;
+	protected static byte[] encode(byte[] msg, int rsv, boolean fin, boolean maskPayload, byte opcode) throws Exception {
 		ByteArrayOutputStream frame = new ByteArrayOutputStream();
-
-		byte opcode;
-		opcode = OPCODE_TEXT;
-
 
 		int length = msg.length;
 
@@ -248,15 +256,23 @@ public class WebSocketCodec {
 				frame.write((0xFF)&(length>>q));
 			}
 		}
-
+		if(maskPayload) {
+			byte[] mask = new byte[] {1,1,1,1};
+			frame.write(mask);
+			applyMask(msg, 0, msg.length, mask);
+		}
 		frame.write(msg);
 		return frame.toByteArray();
 
 	}
 
 	private void unmask(byte[] frame, int startIndex, int endIndex) {
+		applyMask(frame, startIndex, endIndex, maskingKey);
+	}
+	
+	public static void applyMask(byte[] frame, int startIndex, int endIndex, byte[] mask) {
 		for (int i = 0; i < endIndex-startIndex; i++) {
-			frame[startIndex+i] = (byte) (frame[startIndex+i] ^ maskingKey[i % 4]);
+			frame[startIndex+i] = (byte) (frame[startIndex+i] ^ mask[i % 4]);
 		}
 	}
 
@@ -292,5 +308,9 @@ public class WebSocketCodec {
 				protocolViolation("received non-continuation data frame while inside fragmented message");
 			}
 		}
+	}
+	
+	public boolean isCloseOpcodeReceived() {
+		return this.closeOpcodeReceived;
 	}
 }
