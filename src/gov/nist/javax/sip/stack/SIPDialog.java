@@ -177,6 +177,8 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
     private Via lastResponseTopMostVia;
     protected Integer lastResponseStatusCode;
     protected long lastResponseCSeqNumber;
+    protected long lastInviteResponseCSeqNumber;
+    protected int lastInviteResponseCode;
     protected String lastResponseMethod;
     protected String lastResponseFromTag;
     protected String lastResponseToTag;
@@ -296,7 +298,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
     private transient Set<SIPDialogEventListener> eventListeners;
     // added for Issue 248 :
     // https://jain-sip.dev.java.net/issues/show_bug.cgi?id=248
-    private Semaphore timerTaskLock = new Semaphore(1);
+    private transient Semaphore timerTaskLock = new Semaphore(1);
 
     // We store here the useful data from the first transaction without having
     // to
@@ -322,7 +324,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
     // aggressive flag to optimize eagerly
     private boolean releaseReferences;
 
-    private EarlyStateTimerTask earlyStateTimerTask;
+    private transient EarlyStateTimerTask earlyStateTimerTask;
 
     private int earlyDialogTimeout = 180;
 
@@ -331,7 +333,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
 
   private SIPDialog originalDialog;
 
-  private AckSendingStrategy ackSendingStrategy = new AckSendingStrategyImpl();
+  private transient AckSendingStrategy ackSendingStrategy = new AckSendingStrategyImpl();
 
 	
     // //////////////////////////////////////////////////////
@@ -1495,10 +1497,14 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
             this.dialogDeleteTask = new DialogDeleteTask();
             // Delete the transaction after the max ack timeout.
             if (sipStack.getTimer() != null && sipStack.getTimer().isStarted()) {
+            	int delay = SIPTransactionStack.BASE_TIMER_INTERVAL;
+            	if(lastTransaction != null) {
+            		delay = lastTransaction.getBaseTimerInterval();
+            	}
             	sipStack.getTimer().schedule(
                     this.dialogDeleteTask,
                     SIPTransaction.TIMER_H
-                            * lastTransaction.getBaseTimerInterval());
+                            * delay);
             } else {
             	this.delete();
             }
@@ -1867,7 +1873,7 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
                 // My tag is assigned when sending response
             } else {
                 setLocalSequenceNumber(sipRequest.getCSeq().getSeqNumber());
-                this.originalLocalSequenceNumber = localSequenceNumber;
+                this.originalLocalSequenceNumber = getLocalSeqNumber();
                 this.setLocalTag(sipRequest.getFrom().getTag());
                 if (myTag == null)
                     if (logger.isLoggingEnabled())
@@ -2420,8 +2426,12 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
              * request is actually dispatched
              */
             cseq = (CSeq) sipRequest.getCSeq();
-            cseq.setSeqNumber(this.localSequenceNumber + 1);
+            cseq.setSeqNumber(getLocalSeqNumber() + 1);
+            if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+                logger.logDebug(
+                        "SIPDialog::createRequest:setting Request Seq Number to " + cseq.getSeqNumber());
 
+            }
         } catch (InvalidArgumentException ex) {
             InternalErrorHandler.handleException(ex);
         }
@@ -2766,8 +2776,18 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
 
         try {
             // Increment before setting!!
-            localSequenceNumber++;
-            dialogRequest.getCSeq().setSeqNumber(getLocalSeqNumber());
+        	long cseqNumber = dialogRequest.getCSeq() == null?getLocalSeqNumber():dialogRequest.getCSeq().getSeqNumber();
+        	if(cseqNumber > getLocalSeqNumber()) {
+        		setLocalSequenceNumber(cseqNumber);
+        	} else {
+        		setLocalSequenceNumber(getLocalSeqNumber() + 1);
+        	}
+        	if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+                logger.logDebug(
+                        "SIPDialog::sendRequest:setting Seq Number to " + getLocalSeqNumber());
+
+            }
+        	dialogRequest.getCSeq().setSeqNumber(getLocalSeqNumber());
         } catch (InvalidArgumentException ex) {
             logger.logFatalError(ex.getMessage());
         }
@@ -3057,6 +3077,14 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
 
             String transport = uri4transport.getTransportParam();
             ListeningPointImpl lp;
+            
+            if(uri4transport.isSecure()){
+            	// Fix for https://java.net/jira/browse/JSIP-492
+            	if(transport != null && transport.equalsIgnoreCase(ListeningPoint.UDP)){
+            		throw new SipException("Cannot create ACK - impossible to use sips uri with transport UDP:"+uri4transport);
+            	}
+            	transport = ListeningPoint.TLS;
+            }
             if (transport != null) {
                 lp = (ListeningPointImpl) sipProvider
                         .getListeningPoint(transport);
@@ -3243,9 +3271,9 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
         this.callIdHeader = sipResponse.getCallId();
         final int statusCode = sipResponse.getStatusCode();
         if (statusCode == 100) {
-            if (logger.isLoggingEnabled())
+            if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
                 logger
-                        .logWarning(
+                        .logDebug(
                                 "Invalid status code - 100 in setLastResponse - ignoring");
             return;
         }
@@ -3263,6 +3291,10 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
             this.lastResponseMethod = cseqMethod;
             long responseCSeqNumber = sipResponse.getCSeq().getSeqNumber();
             this.lastResponseCSeqNumber = responseCSeqNumber;
+            if(Request.INVITE.equals(cseqMethod)) {
+            	this.lastInviteResponseCSeqNumber = responseCSeqNumber;
+            	this.lastInviteResponseCode = statusCode;
+            }
             if (sipResponse.getToTag() != null ) {
                 this.lastResponseToTag = sipResponse.getToTag();
             }
@@ -3568,8 +3600,8 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
 
             }
         } finally {
-            if (sipResponse.getCSeq().getMethod().equals(Request.INVITE)
-                    && transaction instanceof ClientTransaction && this.getState() != DialogState.TERMINATED) {
+            if (sipResponse.getCSeq().getMethod().equals(Request.INVITE) &&
+                    transaction != null && transaction instanceof ClientTransaction && this.getState() != DialogState.TERMINATED) {
                 this.acquireTimerTaskSem();
                 try {
                     if (this.getState() == DialogState.EARLY) {
@@ -3973,9 +4005,8 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
         		  logger.logDebug("SIPDialog::handleAck: lastResponseCSeqNumber = " + lastInviteOkReceived + " ackTxCSeq " + ackTransaction.getCSeq());
         	  }
              if (lastResponseStatusCode != null
-                    && lastResponseStatusCode.intValue() / 100 == 2
-                    && lastResponseMethod.equals(Request.INVITE)
-                    && lastResponseCSeqNumber == ackTransaction.getCSeq()) {
+                    && this.lastInviteResponseCode / 100 == 2
+                    && lastInviteResponseCSeqNumber == ackTransaction.getCSeq()) {
 
                 ackTransaction.setDialog(this, lastResponseDialogId);
                 /*
@@ -4360,7 +4391,9 @@ public class SIPDialog implements javax.sip.Dialog, DialogExt {
 
    @Override
    public int hashCode() {
-       if ( callIdHeader == null) {
+	   if ( (callIdHeader == null) &&
+			   // https://java.net/jira/browse/JSIP-493
+			   (callIdHeaderString == null)) {
            return 0;
        } else {
            return getCallId().getCallId().hashCode();

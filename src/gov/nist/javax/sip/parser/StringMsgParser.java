@@ -30,8 +30,10 @@
 
 package gov.nist.javax.sip.parser;
 
+import gov.nist.core.CommonLogger;
 import gov.nist.core.Host;
 import gov.nist.core.HostNameParser;
+import gov.nist.core.StackLogger;
 import gov.nist.javax.sip.SIPConstants;
 import gov.nist.javax.sip.address.AddressImpl;
 import gov.nist.javax.sip.address.GenericURI;
@@ -52,6 +54,8 @@ import java.text.ParseException;
  * Acknowledgement: 1/12/2007: Yanick Belanger rewrote the parsing loops to make them
  * simpler and quicker.
  */
+
+import javax.xml.bind.DatatypeConverter;
 
 /**
  * Parse SIP message and parts of SIP messages such as URI's etc from memory and
@@ -77,6 +81,8 @@ import java.text.ParseException;
 public class StringMsgParser implements MessageParser {
 
     protected static boolean computeContentLengthFromMessage = false;
+    
+    private static StackLogger logger = CommonLogger.getLogger(StringMsgParser.class);
 
     /**
      * @since v0.9
@@ -114,6 +120,9 @@ public class StringMsgParser implements MessageParser {
         }
         catch (ArrayIndexOutOfBoundsException e) {
             // Array contains only control char, return null.
+        	if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
+            	logger.logDebug("handled only control char so returning null");
+            }
             return null;
         }
 
