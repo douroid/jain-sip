@@ -42,6 +42,7 @@ import java.net.SocketException;
 import java.nio.channels.SocketChannel;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.LinkedList;
 import java.util.Set;
@@ -68,8 +69,6 @@ public class NIOHandler {
     
     private NioTcpMessageProcessor messageProcessor;
     
-    Timer timer = new Timer();
-
     // A cache of client sockets that can be re-used for
     // sending tcp messages.
     private final ConcurrentHashMap<String, SocketChannel> socketTable = new ConcurrentHashMap<String, SocketChannel>();
@@ -89,8 +88,6 @@ public class NIOHandler {
     protected NIOHandler(SIPTransactionStack sipStack, NioTcpMessageProcessor messageProcessor) {
         this.sipStack = (SipStackImpl) sipStack;
         this.messageProcessor = messageProcessor;
-        if(sipStack.nioSocketMaxIdleTime > 0) 
-        	timer.scheduleAtFixedRate(new SocketTimeoutAuditor(), 20000, 20000);
     }
 
     protected void putSocket(String key, SocketChannel sock) {
@@ -137,7 +134,7 @@ public class NIOHandler {
     				logger.logDebug("Removing cached socketChannel without key"
     						+ this + " socketChannel = " + channel + " key = " + key);
     			}
-    			socketTable.remove(key);
+    			removeSocket(key);
     		}
     	}
     }
@@ -224,7 +221,13 @@ public class NIOHandler {
         			// address (i.e. that of the stack). In version 1.2
         			// the IP address is on a per listening point basis.
         			try {
-        				clientSock = messageProcessor.blockingConnect(new InetSocketAddress(receiverAddress, contactPort), 10000);
+        				clientSock = messageProcessor.blockingConnect(new InetSocketAddress(receiverAddress, contactPort), senderAddress);
+        				if(messageChannel instanceof NioTlsMessageChannel) {
+        					// Added for https://java.net/jira/browse/JSIP-483 
+	        				HandshakeCompletedListenerImpl listner = new HandshakeCompletedListenerImpl((NioTlsMessageChannel)messageChannel, clientSock);
+	                        ((NioTlsMessageChannel) messageChannel)
+	                                .setHandshakeCompletedListener(listner);
+        				}
         				newSocket = true;
         				//sipStack.getNetworkLayer().createSocket(
         				//		receiverAddress, contactPort, senderAddress); TODO: sender address needed
@@ -293,7 +296,7 @@ public class NIOHandler {
         						"inaddr = " + receiverAddress +
         						" port = " + contactPort);
         			}
-        			clientSock = messageProcessor.blockingConnect(new InetSocketAddress(receiverAddress, contactPort), 10000);
+        			clientSock = messageProcessor.blockingConnect(new InetSocketAddress(receiverAddress, contactPort), senderAddress);
         			newSocket = true;
         			messageChannel.peerPort = contactPort;
         			putSocket(key, clientSock);
@@ -366,33 +369,24 @@ public class NIOHandler {
     
     public void stop() {
     	try {
-        	timer.cancel();
-        	timer.purge();
-        	synchronized(socketTable) {
-        		HashSet<String> keysToRemove = new HashSet<String>();
-        		for(String key : socketTable.keySet()) {
-        			try {
-        				SocketChannel socketChannel = socketTable.get(key);
-        				NioTcpMessageChannel messageChannel = NioTcpMessageChannel.getMessageChannel(socketChannel);
-        				if(messageChannel == null) {
-        					keysToRemove.add(key);
-        				} else {
-        					keysToRemove.add(key);
-        					if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
-        						logger.logDebug("stop() : Will remove socket " + key + " lastActivity=" + messageChannel.getLastActivityTimestamp() + " current= " + System.currentTimeMillis());
-        					NioTcpMessageChannel.removeMessageChannel(socketChannel);
-        					messageChannel.close();
-        				}
-        			} catch (Exception anything) {
-
-        			}
-        		}
-        		for(String key : keysToRemove) {
-        			socketTable.remove(key);
-        			if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
-        				logger.logDebug("stop() : Removed socket " + key);
-        		}
-        	}
+        	// Reworked the method for https://java.net/jira/browse/JSIP-471
+			if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+				logger.logDebug("keys to check for inactivity removal " + NioTcpMessageChannel.channelMap.keySet());
+				logger.logDebug("existing socket in NIOHandler " + socketTable.keySet());
+			}
+			Iterator<Entry<SocketChannel, NioTcpMessageChannel>> entriesIterator = NioTcpMessageChannel.channelMap.entrySet().iterator();
+			while(entriesIterator.hasNext()) {
+				Entry<SocketChannel, NioTcpMessageChannel> entry = entriesIterator.next();
+				SocketChannel socketChannel = entry.getKey();
+				NioTcpMessageChannel messageChannel = entry.getValue();
+				
+				if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+					logger.logDebug("stop() : Removing socket " + messageChannel.key 
+							+ " socketChannel = " + socketChannel);
+				}
+				messageChannel.close();
+				entriesIterator = NioTcpMessageChannel.channelMap.entrySet().iterator();
+			}
         } catch (Exception e) {
         	
         }
@@ -411,7 +405,8 @@ public class NIOHandler {
     		}
     		if(channel == null) { // this is where the threads will race
     			SocketAddress sockAddr = new InetSocketAddress(inetAddress, port);
-    			channel = messageProcessor.blockingConnect((InetSocketAddress) sockAddr, 10000);
+    			channel = messageProcessor.blockingConnect((InetSocketAddress) sockAddr, this.messageProcessor
+    					.getIpAddress());
     			if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
     				logger.logDebug("create channel = " + channel + "  " + inetAddress + " " + port);
     			if(channel != null && channel.isConnected()) {
@@ -427,40 +422,4 @@ public class NIOHandler {
 				logger.logDebug("Returning socket " + key + " channel = " + channel);
     	}
     }
-
-    private class SocketTimeoutAuditor extends TimerTask {
-    	public void run() {
-    		synchronized(socketTable) {
-    			try {
-    				HashSet<String> keysToRemove = new HashSet<String>();
-    				for(String key : socketTable.keySet()) {
-    					SocketChannel socketChannel = socketTable.get(key);
-    					NioTcpMessageChannel messageChannel = NioTcpMessageChannel.getMessageChannel(socketChannel);
-    					if(messageChannel == null) {
-    						keysToRemove.add(key);
-    					} else {
-    						if(System.currentTimeMillis() - messageChannel.getLastActivityTimestamp() > sipStack.nioSocketMaxIdleTime) {
-    							keysToRemove.add(key);
-    							if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
-    								logger.logDebug("Will remove socket " + key + " lastActivity="
-    										+ messageChannel.getLastActivityTimestamp() + " current= " +
-    										System.currentTimeMillis() + " socketChannel = "
-    										+ socketChannel);
-    							NioTcpMessageChannel.removeMessageChannel(socketChannel);
-    							messageChannel.close();
-    						}
-    					}
-    				}
-    				for(String key : keysToRemove) {
-    					socketTable.remove(key);
-    					if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
-    						logger.logDebug("Removed socket " + key);
-    				}
-    			} catch (Exception anything) {
-
-    			}
-    		}
-    	}
-    }
-
 }

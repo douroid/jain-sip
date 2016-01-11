@@ -410,6 +410,8 @@ public abstract class SIPTransactionStack implements
     private long sslHandshakeTimeout = -1;
     
     private boolean sslRenegotiationEnabled = false;
+    
+    protected SocketTimeoutAuditor socketTimeoutAuditor = null;
 
     private static class SameThreadExecutor implements Executor {
 
@@ -495,6 +497,10 @@ public abstract class SIPTransactionStack implements
 
         @Override
         public void runTask() {
+        	if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+            	logger.logDebug(
+                        "Removing forked client transaction : forkId = " + forkId);
+        	}
             forkedClientTransactionTable.remove(forkId);
         }
 
@@ -733,7 +739,7 @@ public abstract class SIPTransactionStack implements
             if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG))
                 logger.logDebug("NOTIFY Supported Natively");
         } else {
-            dialogCreatingMethods.add(extensionMethod.trim().toUpperCase());
+            dialogCreatingMethods.add(Utils.toUpperCase(extensionMethod.trim()));
         }
     }
 
@@ -1157,7 +1163,7 @@ public abstract class SIPTransactionStack implements
             SIPServerTransaction serverTransaction) {
         String branchId = ((SIPRequest) serverTransaction.getRequest())
                 .getTopmostVia().getBranch();
-        return this.terminatedServerTransactionsPendingAck.contains(branchId);
+       return this.terminatedServerTransactionsPendingAck.contains(branchId);
     }
 
     /**
@@ -1469,14 +1475,26 @@ public abstract class SIPTransactionStack implements
         requestReceived.setMessageChannel(requestMessageChannel);
 
         if(sipMessageValve != null) {
-            if(!sipMessageValve.processRequest(
-                    requestReceived, requestMessageChannel)) {
-                if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
-                    logger.logDebug(
-                            "Request dropped by the SIP message valve. Request = " + requestReceived);
+        	// https://java.net/jira/browse/JSIP-511
+        	// catching all exceptions so it doesn't make JAIN SIP to fail
+        	try {	
+	            if(!sipMessageValve.processRequest(
+	                    requestReceived, requestMessageChannel)) {
+	                if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+	                    logger.logDebug(
+	                            "Request dropped by the SIP message valve. Request = " + requestReceived);
+	                }
+	                return null;
+	            }
+        	} catch(Exception e) {
+        		if(logger.isLoggingEnabled(LogWriter.TRACE_ERROR)) {
+                    logger.logError(
+                            "An issue happening the valve on request " + 
+                            		requestReceived + 
+                            		" thus the message will not be processed further", e);
                 }
-                return null;
-            }
+        		return null;
+        	}
         }
 
         // Transaction to handle this request
@@ -1595,14 +1613,26 @@ public abstract class SIPTransactionStack implements
         SIPClientTransaction currentTransaction;
 
         if(sipMessageValve != null) {
-            if(!sipMessageValve.processResponse(
-                    responseReceived, responseMessageChannel)) {
-                if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
-                    logger.logDebug(
-                            "Response dropped by the SIP message valve. Response = " + responseReceived);
+        	// https://java.net/jira/browse/JSIP-511
+        	// catching all exceptions so it doesn't make JAIN SIP to fail
+        	try {
+	            if(!sipMessageValve.processResponse(
+	                    responseReceived, responseMessageChannel)) {
+	                if(logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+	                    logger.logDebug(
+	                            "Response dropped by the SIP message valve. Response = " + responseReceived);
+	                }
+	                return null;
+	            }
+        	} catch(Exception e) {
+        		if(logger.isLoggingEnabled(LogWriter.TRACE_ERROR)) {
+                    logger.logError(
+                            "An issue happening the valve on response " + 
+                            		responseReceived + 
+                            		" thus the message will not be processed further", e);
                 }
-                return null;
-            }
+        		return null;
+        	}
         }
 
         String key = responseReceived.getTransactionId();
@@ -1843,6 +1873,10 @@ public abstract class SIPTransactionStack implements
         			final String forkId = clientTx.getForkId();
         			if (forkId != null && clientTx.isInviteTransaction()
         					&& this.maxForkTime != 0) {
+        				if (logger.isLoggingEnabled(LogWriter.TRACE_DEBUG)) {
+        	            	logger.logDebug(
+        	                        "Scheduling to remove forked client transaction : forkId = " + forkId + " in "  + this.maxForkTime + " seconds");
+        	        	}
         				this.timer.schedule(new RemoveForkedTransactionTimerTask(
         						forkId), this.maxForkTime * 1000);
         				clientTx.stopExpiresTimer();
