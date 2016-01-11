@@ -25,6 +25,9 @@
  */
 package gov.nist.javax.sip.stack;
 
+import gov.nist.javax.sip.ClientTransactionExt;
+import gov.nist.javax.sip.SipStackImpl;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 /**
@@ -48,6 +51,11 @@ public interface NioTlsChannelInterface {
 	 * Initialize the buffer again.
 	 * @return
 	 */
+	ByteBuffer prepareAppDataBuffer(int capacity);
+	/**
+	 * Initialize the buffer again.
+	 * @return
+	 */
 	ByteBuffer prepareEncryptedDataBuffer();
 	/**
 	 * Add plain text data in the queue. It will be encrpted later in generic way
@@ -55,4 +63,14 @@ public interface NioTlsChannelInterface {
 	 * @throws Exception
 	 */
 	void addPlaintextBytes(byte[] bytes) throws Exception;
+	/**
+	 * Returns the SIP Stack associated with this channel 
+	 * @return
+	 */
+	SipStackImpl getSIPStack();
+	/**
+	 * Returns the Client Transaction associated with this channel
+	 * @return
+	 */
+	ClientTransactionExt getEncapsulatedClientTransaction();
 }
