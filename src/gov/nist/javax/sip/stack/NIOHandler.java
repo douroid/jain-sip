@@ -221,7 +221,7 @@ public class NIOHandler {
         			// address (i.e. that of the stack). In version 1.2
         			// the IP address is on a per listening point basis.
         			try {
-        				clientSock = messageProcessor.blockingConnect(new InetSocketAddress(receiverAddress, contactPort), senderAddress);
+        				clientSock = messageProcessor.blockingConnect(new InetSocketAddress(receiverAddress, contactPort), 10000);
         				if(messageChannel instanceof NioTlsMessageChannel) {
         					// Added for https://java.net/jira/browse/JSIP-483 
 	        				HandshakeCompletedListenerImpl listner = new HandshakeCompletedListenerImpl((NioTlsMessageChannel)messageChannel, clientSock);

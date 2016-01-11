@@ -1,5 +1,6 @@
 package gov.nist.javax.sip.parser;
 
+import gov.nist.javax.sip.SipStackImpl;
 import gov.nist.javax.sip.stack.BlockingQueueDispatchAuditor;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,34 +29,31 @@ public class PostParseExecutorServices {
     }
 
     public static BlockingQueueDispatchAuditor staticQueueAuditor;
+    public static void setPostParseExcutorSize(SipStackImpl sipStack, int threads, int queueTimeout){
+    	if(postParseExecutor != null) {
+    		postParseExecutor.shutdownNow();
+    	}
+    	if(staticQueueAuditor != null) {
+    		try {
+    			staticQueueAuditor.stop();
+    		} catch (Exception e) {
 
-    public static void setPostParseExcutorSize(int threads, int queueTimeout) {
-        if (postParseExecutors != null) {
-            for (ExecutorService execServ : postParseExecutors) {
-                execServ.shutdownNow();
-            }
-        }
-        if (staticQueueAuditor != null) {
-            try {
-                staticQueueAuditor.stop();
-            } catch (Exception e) {
-
-            }
-        }
-        postParseExecutors = new ArrayList();
-        if (threads <= 0) {
-            postParseExecutors = null;
-        } else {
-            for (int i = 0; i < threads; i++) {
-                BlockingQueue<Runnable> staticQueue = new LinkedBlockingQueue<Runnable>();
-                postParseExecutors.add(new ThreadPoolExecutor(1, 1,
-                        0, TimeUnit.SECONDS, staticQueue,
-                        new NamedThreadFactory()));
-            }
-            /*staticQueueAuditor = new BlockingQueueDispatchAuditor(staticQueue);
-             staticQueueAuditor.setTimeout(queueTimeout);
-             staticQueueAuditor.start(2000); */
-        }
+    		}
+    	}
+    	if(threads<=0) {
+    		postParseExecutor = null;
+    	} else {
+    		staticQueue = new LinkedBlockingQueue<Runnable>();
+    		postParseExecutor = new ThreadPoolExecutor(threads, threads,
+    				0, TimeUnit.SECONDS, staticQueue,
+    				new NamedThreadFactory());
+    		// Contribution for https://github.com/Mobicents/jain-sip/issues/39
+    		if(sipStack.getStackCongestionControlTimeout() > 0) {
+	    		staticQueueAuditor = new BlockingQueueDispatchAuditor(staticQueue);
+	    		staticQueueAuditor.setTimeout(queueTimeout);
+	    		staticQueueAuditor.start(2000);
+    		}
+    	}
 
     }
 

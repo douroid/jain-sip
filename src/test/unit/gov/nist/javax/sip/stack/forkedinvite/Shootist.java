@@ -2,6 +2,8 @@ package test.unit.gov.nist.javax.sip.stack.forkedinvite;
 
 import gov.nist.javax.sip.ResponseEventExt;
 import gov.nist.javax.sip.SipStackImpl;
+import gov.nist.javax.sip.header.ims.PAssertedServiceHeader;
+import gov.nist.javax.sip.header.ims.PPreferredServiceHeader;
 import gov.nist.javax.sip.message.ResponseExt;
 
 import java.util.ArrayList;
@@ -518,6 +520,15 @@ public class Shootist implements SipListener {
                     "Call-Info", "<http://www.antd.nist.gov>");
             request.addHeader(callInfoHeader);
 
+            // https://java.net/jira/browse/JSIP-476 Non regression test 
+            Header pPreferredServiceHeader = headerFactory.createHeader(
+                    PPreferredServiceHeader.NAME, InviteTest.PREFERRED_SERVICE_VALUE);
+            request.addHeader(pPreferredServiceHeader);
+            Header pAssertedServiceHeader = headerFactory.createHeader(
+                    PAssertedServiceHeader.NAME, InviteTest.PREFERRED_SERVICE_VALUE);
+            request.addHeader(pPreferredServiceHeader);
+            request.addHeader(pAssertedServiceHeader);
+            
             // Create the client transaction.
             inviteTid = sipProvider.getNewClientTransaction(request);
             this.originalTransaction = inviteTid;

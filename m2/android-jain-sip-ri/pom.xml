@@ -10,14 +10,14 @@
 	</parent>
 
 	<groupId>javax.sip</groupId>
-	<artifactId>jain-sip-ri</artifactId>
-	<version>1.2.192</version>
+	<artifactId>android-jain-sip-ri</artifactId>
+	<version>1.2.X-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>jain-sip-ri</name>
+	<name>android-jain-sip-ri</name>
 	<url>http://code.google.com/p/jain-sip/</url>
 	<build>
-		<sourceDirectory>../../src</sourceDirectory>
+		<sourceDirectory>../../src/android</sourceDirectory>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -26,12 +26,6 @@
 				<configuration>
 					<source>1.7</source>
 					<target>1.7</target>
-					<includes>
-                                               <include>gov/nist/javax/sip/**</include>
-                                               <include>gov/nist/javax/sdp/**</include>
-                                               <include>gov/nist/core/**</include>
-                                               <include>javax/sdp/**</include>
-                                       </includes>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -67,6 +61,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.8.1</version>
+				<configuration>
+					  <sourcepath>${basedir}/../../src/android</sourcepath>
+					<includePackageNames>android.*</includePackageNames>
+				</configuration>
 				<executions>
 				        <execution>
 				            <id>attach-javadocs</id>
@@ -107,6 +105,7 @@
 					<include>gov/nist/javax/sdp/**</include>
 					<include>gov/nist/core/**</include>
 					<include>javax/sdp/**</include>
+					<include>javax/sip/**</include>
 				</includes>
 				<excludes>
 					<exclude>**/*.java</exclude>
@@ -147,12 +146,6 @@
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 			<version>1.2.14</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.sip</groupId>
-			<artifactId>jain-sip-api</artifactId>
-			<version>1.2.0</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

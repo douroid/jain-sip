@@ -32,6 +32,8 @@ import gov.nist.core.CommonLogger;
 import gov.nist.core.LogLevels;
 import gov.nist.core.LogWriter;
 import gov.nist.core.StackLogger;
+import gov.nist.javax.sip.header.CallID;
+import gov.nist.javax.sip.header.ContentLength;
 import gov.nist.javax.sip.message.SIPMessage;
 import gov.nist.javax.sip.stack.ConnectionOrientedMessageChannel;
 import gov.nist.javax.sip.stack.QueuedMessageDispatchBase;
@@ -104,10 +106,36 @@ public class NioPipelineParser {
     		time = System.currentTimeMillis();
     	}
         public void run() {   
-            logger.logInfo("serving msg on call id " + callId);
+        	
+            // we acquire it in the thread to avoid blocking other messages with a different call id
+            // that could be processed in parallel                                    
+            Semaphore semaphore = callIDOrderingStructure.getSemaphore();
+            final Queue<UnparsedMessage> messagesForCallID = callIDOrderingStructure.getMessagesForCallID();
+            try {                                                                                
+                boolean acquired = semaphore.tryAcquire(30, TimeUnit.SECONDS);
+                if(!acquired) {
+                	if (logger.isLoggingEnabled(StackLogger.TRACE_WARN)) {
+                		logger.logWarning("Semaphore acquisition for callId " + callId + " wasn't successful so don't process message, returning");
+                	}
+                	// https://java.net/jira/browse/JSIP-499 don't process the message if the semaphore wasn't acquired
+                	return;
+                } else {
+	                if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
+	                	logger.logDebug("semaphore acquired for message " + callId + " acquired");
+	                }
+                }
+            } catch (InterruptedException e) {
+            	logger.logError("Semaphore acquisition for callId " + callId + " interrupted, couldn't process message, returning", e);
+            	// https://java.net/jira/browse/JSIP-499 don't process the message if the semaphore wasn't acquired
+            	return;
+            }
+            
+            UnparsedMessage unparsedMessage = null;
             SIPMessage parsedSIPMessage = null;
+            boolean messagePolled = false;
             try {
-
+            	synchronized(smp) {
+            		unparsedMessage = messagesForCallID.peek();
             		if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
             			logger.logDebug( "\nUnparsed message before parser is:\n" + unparsedMessage);
             		}
@@ -121,13 +149,13 @@ public class NioPipelineParser {
         			} else if(unparsedMessage.body.length > 0) {
         				parsedSIPMessage.setMessageContent(unparsedMessage.body);
         			}
-
             	if(sipStack.sipEventInterceptor != null
             			// https://java.net/jira/browse/JSIP-503
                 		&& parsedSIPMessage != null) {
             		sipStack.sipEventInterceptor.beforeMessage(parsedSIPMessage);
             	}
 
+            	}
             	if(parsedSIPMessage != null) { // https://java.net/jira/browse/JSIP-503
             		sipMessageListener.processMessage(parsedSIPMessage);
             	}
@@ -141,8 +169,9 @@ public class NioPipelineParser {
             	logger.logError("Error occured processing message " + message, e);
                 // We do not break the TCP connection because other calls use the same socket here
             } finally {            
-                if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
-                	logger.logDebug("releasing semaphore for message " + parsedSIPMessage);
+            	// once acquired we get the first message to process
+            	messagesForCallID.poll();
+            	messagePolled = true;
                 }
                 if(sipStack.sipEventInterceptor != null
                 		// https://java.net/jira/browse/JSIP-503
@@ -200,12 +229,12 @@ public class NioPipelineParser {
 				message.append(line); // Collect the line so far in the message buffer (line by line)
                 String lineIgnoreCase = line.toLowerCase();
                 // contribution from Alexander Saveliev compare to lower case as RFC 3261 states (7.3.1 Header Field Format) states that header fields are case-insensitive
-				if(lineIgnoreCase.startsWith(ContentLengthHeader.NAME.toLowerCase())) { // naive Content-Length header parsing to figure out how much bytes of message body must be read after the SIP headers
+				if(lineIgnoreCase.startsWith(ContentLength.NAME_LOWER)) { // naive Content-Length header parsing to figure out how much bytes of message body must be read after the SIP headers
 					contentLength = Integer.parseInt(line.substring(
-							ContentLengthHeader.NAME.length()+1).trim());
-				} else if(lineIgnoreCase.startsWith(CallIdHeader.NAME.toLowerCase())) { // naive Content-Length header parsing to figure out how much bytes of message body must be read after the SIP headers
+							ContentLength.NAME_LOWER.length()+1).trim());
+				} else if(lineIgnoreCase.startsWith(CallID.NAME_LOWER)) { // naive Content-Length header parsing to figure out how much bytes of message body must be read after the SIP headers
 					callId = line.substring(
-							CallIdHeader.NAME.length()+1).trim();
+							CallID.NAME_LOWER.length()+1).trim();
 				}
 			} else {				
 				if(isPreviousLineCRLF) {
@@ -440,3 +469,25 @@ public class NioPipelineParser {
     
 
 }
+            	if(!messagePolled) {
+            		// https://java.net/jira/browse/JSIP-503 we poll the message only if it 
+            		// wasn't polled in case of some exception by example while parsing or before processing the message
+            		// as in the interceptor can cause the poll not to be called
+            		messagesForCallID.poll(); // move on to the next one
+            	}
+                if(messagesForCallID.size() <= 0) {
+                    messagesOrderingMap.remove(callId);
+                    if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
+                    	logger.logDebug("CallIDOrderingStructure removed for callId " + callId);
+                    }
+                }
+                if (logger.isLoggingEnabled(StackLogger.TRACE_DEBUG)) {
+                	logger.logDebug("releasing semaphore for message " + parsedSIPMessage);
+                }
+                //release the semaphore so that another thread can process another message from the call id queue in the correct order
+                // or a new message from another call id queue
+                semaphore.release(); 
+                if(messagesOrderingMap.isEmpty()) {
+                    synchronized (messagesOrderingMap) {
+                        messagesOrderingMap.notify();
+                    }
