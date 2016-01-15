@@ -134,7 +134,9 @@ public class MultipartMimeContentImpl implements MultipartMimeContent {
   }
 
   private ContentImpl parseBodyPart(String bodyPart) throws ParseException {
-    String[] nextPartSplit = bodyPart.split("\r?\n\r?\n");
+    // ensure we only take double line as headerBody separation, not as body 
+    // content.https://github.com/RestComm/jain-sip/issues/49
+    String[] nextPartSplit = bodyPart.split("\r?\n\r?\n", 2);
 
     String headers[] = null;
     String bodyContent;
