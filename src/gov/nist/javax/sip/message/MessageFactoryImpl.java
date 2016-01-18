@@ -38,6 +38,8 @@ import gov.nist.javax.sip.header.*;
 import javax.sip.message.*;
 import javax.sip.address.*;
 import gov.nist.javax.sip.parser.*;
+import io.pkts.buffer.Buffers;
+import io.pkts.packet.sip.SipRequest;
 
 /**
  * Message Factory implementation
@@ -238,15 +240,22 @@ public class MessageFactoryImpl implements MessageFactory, MessageFactoryExt {
                     "JAIN-SIP Exception, some parameters are missing"
                             + ", unable to create the request", 0);
 
-        SIPRequest sipRequest = new SIPRequestImpl(method,requestURI.toString());
+        SipRequest req = SipRequest.request(Buffers.wrap(method), requestURI.toString()).
+                callId((io.pkts.packet.sip.header.CallIdHeader) callId).
+                to((io.pkts.packet.sip.header.ToHeader) to).
+                via((io.pkts.packet.sip.header.ViaHeader) via.get(0)).
+                cseq((io.pkts.packet.sip.header.CSeqHeader) cSeq).
+                from((io.pkts.packet.sip.header.FromHeader) from).build();
+        SIPRequest sipRequest = new SIPRequestImpl(req);        
         /*sipRequest.setRequestURI(requestURI);
-        sipRequest.setMethod(method);*/
+        sipRequest.setMethod(method);
         sipRequest.setCallId(callId);
         sipRequest.setCSeq(cSeq);
         sipRequest.setFrom(from);
         sipRequest.setTo(to);
-        sipRequest.setVia(via);
+        sipRequest.setVia(via);*/
         sipRequest.setMaxForwards(maxForwards);
+        
         if (userAgent != null) {
             sipRequest.setHeader(userAgent);
         }
